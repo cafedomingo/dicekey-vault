@@ -2,7 +2,8 @@
 
 Companion documents: `derivation.md` (how keys are made), `security.md` (what is stored and
 why it is safe), `catalog-format.md` (the catalog's file, link and code formats), `design.md`
-(the look), `scanning.md` (how the scanner reads a DiceKey) and `backlog.md` (what is left).
+(the look) and `scanning.md` (how the scanner reads a DiceKey). What is left is in the
+repository's issues.
 
 ## The app in one paragraph
 
@@ -115,6 +116,10 @@ Everything else, the bundle identifier included, is a committed default in
 `Config/Signing.xcconfig`. The identifier is `com.cafedomingo.dicekeys`, because
 `com.dicekeys` belongs to DiceKeys, LLC and identifiers are globally unique.
 
+Run on My Mac (Mac Catalyst) once from Xcode to register the Mac. Designed for iPad is not
+offered: run that way, macOS reported every camera as upright at 0 degrees though each needed
+its own turn, listed a USB webcam nowhere, and zoomed a Continuity Camera too far.
+
 ## Getting a build onto a device
 
 `scripts/testflight.sh` archives and uploads the iOS and Mac builds. Versions are computed
@@ -130,6 +135,11 @@ Two things trip up a first upload. App Store Connect needs an app record for the
 identifier, created by hand under My Apps, and a freshly upgraded membership usually has an
 unsigned Program License Agreement, which blocks distribution profiles behind a confusing
 permissions error until it is accepted.
+
+Before shipping, deploy the CloudKit schema to production in the CloudKit console. The
+development schema gains a field only once a development build syncs a record that has it,
+so first run a build from Xcode with sync on and use whatever stores the new field, then
+check the record type has it (`CD_KeyEntry` has `CD_publicKeys`, for instance).
 
 ## What CI covers
 

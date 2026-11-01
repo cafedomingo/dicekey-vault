@@ -11,14 +11,14 @@ DiceKey Vault turns a DiceKey (25 dice in a sealed box) into the few keys that a
 - **Public by default, secret on purpose.** A key's public half or fingerprint shows freely. The secret half stays concealed until a deliberate Reveal, and copying it says when it clears. `security.md` has the protections behind both.
 - **The scan is the only check.** A scanned DiceKey is either one the app has recorded before, with its name and keys, or one it is recording for the first time, which its status calls "New DiceKey". An unexpected "New DiceKey" is how a misread die or the wrong box shows up, so the status says it plainly. Keys themselves carry no verify state: each derives the same way every time.
 - **Making a key is looking it up.** A kind plus a name gives the key immediately, so New key shows the result live as you type, and Save only bookmarks it.
-- **Capture on the best camera, derive on the safest machine.** The phone reads the DiceKey best. Intent, not built: a desktop with a webcam (or Continuity Camera) as a fine place to derive and export, sharing the same screens (backlog, The Mac).
+- **Capture on the best camera, derive on the safest machine.** The phone reads the DiceKey best. The Mac app scans with the Mac's cameras or Continuity Camera, so a desktop is a fine place to derive and export, on the same screens.
 
 ## Platform: iOS 26 and later, Liquid Glass
 
 - It is a native SwiftUI app built from stock components, with one two-column `NavigationSplitView` for every size: home, with every DiceKey and its keys, then whichever of them is selected, a key opened from a DiceKey pushed over it. A phone shows the columns as a stack. The system draws the glass; this system only decides what goes on it.
 - **There are two layers.** The navigation layer is glass: toolbars, the sidebar, sheets, and controls over the camera. The content layer is flat: rows, the DiceKey grid, keys and secrets. Never put glass on content, and never stack glass on glass.
 - The tint is `accent-ink`. Use `.buttonStyle(.glassProminent)` only for the screen's one primary action, and `.glass` for the rest of the controls on the glass layer.
-- The Mac gets the iPad layout, built with Mac Catalyst. A Mac-native layout (a floating glass sidebar, toolbar actions in glass capsules, scanning in the detail pane) is intent, not built; it is in the backlog under The Mac.
+- The Mac gets the iPad layout, built with Mac Catalyst.
 - New key is a draft of the key's own detail, never a sheet: a pushed screen on iPhone and the detail column where there is one. Keep sheets for confirmations, such as Forget.
 - Over the camera, controls are system glass.
 
