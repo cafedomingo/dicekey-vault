@@ -10,67 +10,81 @@ import SwiftUI
 /// upright by default. A letter already on another die can't be typed. Once every die is in,
 /// Open DiceKey takes the keypad's place; tap a die to redo it. A hardware keyboard types the
 /// same way, with an arrow for where the top of the letter points. The keys keep their size, so
-/// on a short window the grid shrinks to the height the keypad leaves.
+/// on a short window the grid shrinks to the height the keypad leaves. In a compact-height window,
+/// such as a phone in landscape, the grid sits beside the keypad, whose letters run in rows of seven
+/// so the keys keep their height, shrinking only to the height left.
 struct TypingView: View {
     private static let keyHeight: CGFloat = 54
     private static let keySpacing: CGFloat = 6
     private static let keyFontSize: CGFloat = 22
     private static let letterColumns = 5
+    private static let compactHeightLetterColumns = 7
     /// The six digits as a phone-style pad filling the letters' space.
     private static let digitColumns = 3
     private static let digitFontSize: CGFloat = 34
-    private static var digitKeyHeight: CGFloat {
-        let rows = CGFloat(FaceDigits.count / digitColumns)
-        return (keypadHeight - (rows - 1) * keySpacing) / rows
-    }
     private static let orientationDieSize: CGFloat = 64
-    private static var keypadHeight: CGFloat {
-        let rows = FaceLetters.count / letterColumns
-        return CGFloat(rows) * keyHeight + CGFloat(rows - 1) * keySpacing
+
+    /// The letters' rows at full height, which the digits fill too.
+    private static func keypadHeight(letterColumns: Int) -> CGFloat {
+        let rows = CGFloat((FaceLetters.count + letterColumns - 1) / letterColumns)
+        return rows * keyHeight + (rows - 1) * keySpacing
     }
 
     let typed: TypedDiceKey
     let onDone: (DiceKey) -> Void
     @Environment(\.isSceneCaptured) private var isSceneCaptured
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @FocusState private var isFocused: Bool
 
+    private var isCompactHeight: Bool { verticalSizeClass == .compact }
+    private var letterColumns: Int { isCompactHeight ? Self.compactHeightLetterColumns : Self.letterColumns }
+
     var body: some View {
-        VStack(spacing: .space4) {
+        let gridExtent = DiceKeyGrid.extent(dieSize: DieView.Size.grid)
+        let keypadHeight = Self.keypadHeight(letterColumns: letterColumns)
+        let layout =
+            isCompactHeight ? AnyLayout(HStackLayout(spacing: .space4)) : AnyLayout(VStackLayout(spacing: .space4))
+        layout {
             GeometryReader { proxy in
                 DiceKeyGrid(
                     faces: typed.faces, concealed: isSceneCaptured,
-                    dieSize: DiceKeyGrid.dieSize(fitting: proxy.size.height), selectedIndex: typed.selectedIndex
+                    dieSize: DiceKeyGrid.dieSize(fitting: proxy.size.height),
+                    selectedIndex: typed.selectedIndex
                 ) {
                     typed.select($0)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxHeight: DiceKeyGrid.extent(dieSize: DieView.Size.grid))
-            HStack {
-                Text(prompt).font(.headline)
-                Spacer()
-                Button("Delete", systemImage: "delete.left", action: typed.backspace)
-                    .labelStyle(.iconOnly)
-                    .font(.title2)
-            }
-            Group {
-                if isSceneCaptured {
-                    Text("Paused while the screen is shared or recorded.").foregroundStyle(.secondary)
-                } else if let diceKey = finished {
-                    Button {
-                        onDone(diceKey)
-                    } label: {
-                        Label("Open DiceKey", systemImage: "checkmark").frame(maxWidth: .infinity)
-                    }
-                    .primaryAction()
-                    .controlSize(.extraLarge)
-                } else {
-                    keypad
+            .frame(maxWidth: gridExtent, maxHeight: gridExtent)
+            .aspectRatio(1, contentMode: .fit)
+            VStack(spacing: .space4) {
+                HStack {
+                    Text(prompt).font(.headline)
+                    Spacer()
+                    Button("Delete", systemImage: "delete.left", action: typed.backspace)
+                        .labelStyle(.iconOnly)
+                        .font(.title2)
                 }
+                Group {
+                    if isSceneCaptured {
+                        Text("Paused while the screen is shared or recorded.").foregroundStyle(.secondary)
+                    } else if let diceKey = finished {
+                        Button {
+                            onDone(diceKey)
+                        } label: {
+                            Label("Open DiceKey", systemImage: "checkmark").frame(maxWidth: .infinity)
+                        }
+                        .primaryAction()
+                        .controlSize(.extraLarge)
+                    } else {
+                        keypad
+                    }
+                }
+                .frame(minHeight: isCompactHeight ? 0 : keypadHeight, maxHeight: keypadHeight, alignment: .top)
             }
-            .frame(height: Self.keypadHeight, alignment: .top)
+            .frame(maxWidth: isCompactHeight ? .infinity : nil)
         }
-        .frame(maxWidth: .contentWidth)
+        .frame(maxWidth: isCompactHeight ? nil : .contentWidth)
         .focusable()
         .focused($isFocused)
         .focusEffectDisabled()
@@ -99,21 +113,17 @@ struct TypingView: View {
         case nil:
             EmptyView()
         case .letter:
-            keys(columns: Self.letterColumns) {
-                ForEach(FaceLetters, id: \.self) { letter in
-                    if typed.usedLetters.contains(letter) {
-                        usedKey(letter.rawValue)
-                    } else {
-                        key(letter.rawValue) { typed.enter(letter: letter) }
-                    }
+            keys(FaceLetters, columns: letterColumns) { letter, height in
+                if typed.usedLetters.contains(letter) {
+                    usedKey(letter.rawValue, height: height)
+                } else {
+                    key(letter.rawValue, height: height) { typed.enter(letter: letter) }
                 }
             }
         case .digit:
-            keys(columns: Self.digitColumns) {
-                ForEach(FaceDigits, id: \.self) { digit in
-                    key(digit.rawValue, height: Self.digitKeyHeight, fontSize: Self.digitFontSize) {
-                        typed.enter(digit: digit)
-                    }
+            keys(FaceDigits, columns: Self.digitColumns) { digit, height in
+                key(digit.rawValue, height: height, fontSize: Self.digitFontSize) {
+                    typed.enter(digit: digit)
                 }
             }
         case .orientation:
@@ -133,15 +143,24 @@ struct TypingView: View {
         }
     }
 
-    private func keys(columns: Int, @ViewBuilder content: () -> some View) -> some View {
-        LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), spacing: Self.keySpacing), count: columns),
-            spacing: Self.keySpacing, content: content)
+    /// The keys in rows that share the keypad's height.
+    private func keys<Value: Hashable>(
+        _ values: [Value], columns: Int, @ViewBuilder content: @escaping (Value, _ height: CGFloat) -> some View
+    ) -> some View {
+        let rows = CGFloat((values.count + columns - 1) / columns)
+        return GeometryReader { proxy in
+            let height = (proxy.size.height - (rows - 1) * Self.keySpacing) / rows
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: Self.keySpacing), count: columns),
+                spacing: Self.keySpacing
+            ) {
+                ForEach(values, id: \.self) { content($0, height) }
+            }
+        }
     }
 
     private func key(
-        _ character: String, height: CGFloat = keyHeight, fontSize: CGFloat = keyFontSize,
-        action: @escaping () -> Void
+        _ character: String, height: CGFloat, fontSize: CGFloat = keyFontSize, action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             Text(character)
@@ -154,12 +173,12 @@ struct TypingView: View {
 
     /// A letter already on another die: struck through on no key at all, so it reads as taken
     /// rather than faint.
-    private func usedKey(_ character: String) -> some View {
+    private func usedKey(_ character: String, height: CGFloat) -> some View {
         Text(character)
             .font(.dice(size: Self.keyFontSize))
             .strikethrough()
             .foregroundStyle(.tertiary)
-            .frame(maxWidth: .infinity, minHeight: Self.keyHeight)
+            .frame(maxWidth: .infinity, minHeight: height)
             .accessibilityLabel("\(character), on another die")
     }
 

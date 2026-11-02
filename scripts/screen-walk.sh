@@ -3,8 +3,8 @@
 # each into the given folder as NN-screen-light.png / NN-screen-dark.png. The appearance is
 # set before each run because the Simulator ignores a change made while a UI test runs, and
 # the app is reinstalled with a clean keychain so both runs start from the same state. Run it
-# on an iPhone and on iPhone Duo, which moves the navigation bar's items into a rail beside the
-# content, and on an iPad in each orientation: landscape shots are named
+# on iPhone Duo, which moves the navigation bar's items into a rail beside the content, and on
+# an iPhone and an iPad in each orientation: landscape shots are named
 # NN-screen-landscape-light.png / NN-screen-landscape-dark.png.
 #
 # Usage: scripts/screen-walk.sh <output-folder> [simulator-udid] [portrait|landscape]

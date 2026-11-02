@@ -17,6 +17,7 @@ extension CGFloat {
     static let radiusSm: CGFloat = 9
     static let radiusMd: CGFloat = 16
 
-    /// Wider than any phone's window (the folded Duo's is 466), so only a wider column is capped.
+    /// Wider than any phone's window in portrait (the folded Duo's is 466), so a phone reaches it only in
+    /// landscape.
     static let contentWidth: CGFloat = 480
 }
