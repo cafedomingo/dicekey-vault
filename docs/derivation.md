@@ -186,7 +186,7 @@ If a test below fails, a derived byte changed. Fix the code. Never change the fi
     - A passphrase or a wallet has no `publicKey` or `fingerprint`. Age's post-quantum key has no `fingerprint`.
   - `defaults`: each default for each seed, with `seed`, `kind`, `recipe` (its literal) and `algorithms` as above.
 
-  `KindVectorTests` and `DiceKeySeedTests` check the app against it. They check each kind's algorithms in order, and that every recipe parses back to itself. CI runs the script with `--tools`, so that these checks run too:
+  `KindVectorTests` and `DiceKeySeedTests` check the app against it. They match each kind's algorithms to the fixture's by type, not by order, and check that every recipe parses back to itself. `eachKindsAlgorithmsInOrder` pins this app's order, which may change. CI runs the script with `--tools`, so that these checks run too:
   - `ssh-keygen`, `wg` and `age-keygen` 1.3 read every key back.
   - `age` encrypts to every age recipient, and the identity decrypts it.
   - The BIP39 reference decodes every phrase.

@@ -5,7 +5,7 @@ The DiceKey is the only secret. Everything else is either derived from it on dem
 ## Who learns what
 
 - **Someone with the DiceKey, or a recovery sheet,** has every key.
-- **Someone with the catalog, a list card, the iCloud copy, a public key or the id** learns key names, kinds and public keys. They also learn about 9 bits of the dice, from the center die. They can derive nothing, because the dice carry about 196 bits.
+- **Someone with the catalog, a list card, the iCloud copy, a public key or the id** learns key names, kinds and public keys (a list card has no public keys). They also learn about 9 bits of the dice, from the center die. They can derive nothing, because the dice carry about 196 bits.
 - **Someone who learns one derived secret** learns nothing about the DiceKey or any other key.
 - **Someone who saw part of the dice** can use the id or a public key to check guesses for the rest. That stays harmless only while most of the dice are unseen.
 - **If you lose the DiceKey and every recovery sheet, you lose every key.** Nothing that is stored can recover them.
@@ -15,7 +15,7 @@ The DiceKey is the only secret. Everything else is either derived from it on dem
 | The DiceKey | Memory (`UnlockedDiceKeys`) | See the first list after this table |
 | The DiceKey, if "Keep on this device" | Keychain: `WhenUnlockedThisDeviceOnly`, `.userPresence`, not synchronizable | Until you turn it off or use Forget |
 | Derived keys | Memory | The app drops them on Hide, on lock, on background, on screen capture and on a screenshot, and when you leave New key. The second list after this table has more |
-| The catalog | SwiftData store, with iOS's default file protection (complete until the first unlock after a restart), so iOS can launch the app before then. It holds nothing secret | Until you use Forget |
+| The catalog | SwiftData store, with iOS's default file protection (complete until the first unlock after a restart). After that unlock, the app can access it while the device is locked, so synced changes can arrive then. It holds nothing secret | Until you use Forget |
 | A copied secret | Pasteboard, local only (no Universal Clipboard) | 60 seconds. The system enforces this |
 | A list card | Paper, kept in the box | No secret: the same fields as the catalog, without public keys |
 | A recovery sheet | Paper, and a PDF only if you save the sheet, or save it from the print dialog | The DiceKey itself, until someone destroys the paper or file |
@@ -43,7 +43,7 @@ The Sync with iCloud switch is in Settings, and it is off by default. When it is
 
 What Apple could see is metadata. It could see that a key named "wallet" exists. It couldn't see the wallet. With Advanced Data Protection, the catalog is end-to-end encrypted. When you turn sync off, syncing stops, but the iCloud copy stays. Delete it in the device's iCloud storage settings.
 
-You can export the same catalog from Settings as a readable JSON file, and keep the file anywhere instead of iCloud. The app also prints a list card for each DiceKey's box. The card's QR code restores the DiceKey's list. Both hold the same non-secret fields. When you import, the app only adds what is missing.
+You can export the same catalog from Settings as a readable JSON file, and keep the file anywhere instead of iCloud. The app also prints a list card for each DiceKey's box. The card's QR code restores the DiceKey's list. Both hold only non-secret fields, and the card has no public keys. When you import, the app only adds what is missing.
 
 A change to the switch applies at the next launch. The store opens once for each launch, because two CloudKit mirrors of one store file aren't supported. If the synced store won't open, the app opens the same store without sync, and Settings says why. The app does this so that it doesn't fail at every launch. Changes from other devices can arrive at any time after the device's first unlock.
 

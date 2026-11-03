@@ -19,7 +19,7 @@ DiceKey Vault turns a DiceKey (25 dice in a sealed box) into the few keys that y
 - **There are two layers.** The navigation layer is glass: toolbars, the sidebar, sheets, and controls over the camera. The content layer is flat: rows, the DiceKey grid, keys and secrets. Never put glass on content, and never stack glass on glass.
 - The tint is `accent-ink`. Use `.buttonStyle(.glassProminent)` only for the screen's one primary action, and `.glass` for the other controls on the glass layer.
 - The Mac app uses the iPad layout and is built with Mac Catalyst.
-- New key is a draft of the key's own detail, never a sheet. It is a pushed screen on iPhone. Where there is a detail column, it is in that column. Keep sheets for confirmations, such as Forget.
+- New key is a draft of the key's own detail, never a sheet. It is a pushed screen on iPhone. Where there is a detail column, it is in that column. Keep sheets for Settings and the paper previews. The app asks for a confirmation, such as Forget, in a dialog.
 - Controls over the camera are system glass.
 
 ## App icon
@@ -43,7 +43,7 @@ The icon is a layered Icon Composer icon: a deep petrol ground, with the DiceKey
 - The one motif of the ground is the corner dice: outlined dice with their bars, turned as on the icon. They sit on a grid tilted 15° from the top right corner, and they fade out within 460 points of that corner. They are `ink`, with an opacity of at most 10% for outlines and 16% for bars (12% and 18% in dark), never the accent. On a phone they extend past the title and the first section headers. They are faint enough to read through, and rows sit on `bg-raised` above them. `appBackdrop()` draws them behind every list and form, once per screen. A sidebar beside a detail column leaves them out. The app leaves them out under Increase Contrast, and behind the camera and the typing screen, where the real dice are.
 - The primary action is `accent` with an `on-accent` label. This is the glass-prominent tint, in both themes. Allow one primary action per screen.
 - `danger` means only destruction, and the recovery sheet's warning that the page is the DiceKey. The app tells you about a misread die in words under the camera, in `ink-muted`. Success has no color of its own. A passphrase's strength bar is the one graded scale (`strength-weak` to `strength-strong`).
-- The camera image sits on `camera` black in every theme. `camera-dim` covers everything except the dice that the camera is reading.
+- The camera image sits on `camera` black in every theme. `camera-dim` covers everything outside a window in the middle of the image, where the DiceKey goes. It shows only while the camera reads no die.
 - Draw a die as the real one looks: a light `die-face` with an `on-die` glyph, in the dark `die-box`. In dark, all three invert: dark dice with light glyphs in a light box. So 25 bright faces don't glare. A dark die has a `die-edge` rim. The rim gives it the outline that its shadow gives a light die, where it sits outside the box.
 
 ## Type
@@ -55,8 +55,8 @@ The icon is a layered Icon Composer icon: a deep petrol ground, with the DiceKey
 
 ## Layout and shape
 
-- Screens are stock lists and forms on `bg`, so the system sets margins, row padding and the gaps between groups. The spacing tokens are for what the app lays out itself. Use `space-3` between a control and its caption and around the camera's controls. Use `space-2` inside a footer or between the words of a recovery phrase. Use `space-4` between the parts of a screen that the app stacks itself, such as the grid and the keypad.
-- Content is flat, and only the glass layer has depth. A key's kind icon sits on an `accent-soft` tile with `radius-sm` corners. The camera frame has `radius-md` corners. Buttons are capsules.
+- Screens are stock lists and forms on `bg`, so the system sets margins, row padding and the gaps between groups. The spacing tokens are for what the app lays out itself. Use `space-3` between a control and its caption and around the camera's controls. Use `space-2` inside a footer or between the words of a recovery phrase. Use `space-4` between the parts of a screen that the app stacks itself, such as the grid and the keypad. Home before the first DiceKey is the exception: it uses `space-6`.
+- Content is flat, and only the glass layer has depth. A key's kind icon sits on an `accent-soft` tile with `radius-sm` corners in a row and `radius-md` corners in a key's header. The camera frame has `radius-md` corners. Buttons are capsules.
 - A component keeps its own proportions. For example, the corners, glyph and bar of a die scale with its size, and the keys of the keypad have their own gap.
 - Content stops at `content-width` and is centered in a wider column. The typing screen, a DiceKey's screen, a key and New key stay phone-width on an iPad. The app caps a list or form as a whole, so the margins beside it don't scroll. The camera is square and the height of the column also sizes it, so it needs no cap. A compact window centers the camera and the typing screen. A regular-width window puts them under their title, so a tall column doesn't leave a gap between the title and them. A compact-height window, such as a phone in landscape, puts the camera's count and hint beside the camera. It puts the typing grid beside the keypad, and the keypad takes the rest of the width. Where a compact-height window shows home beside the detail, as on a large phone, the app hides home while the camera or typing screen is open.
 - Touch targets are at least 44px. A die is 44px square in the grid, except while you type in a window that is too short for the grid and the keypad. There the grid shrinks, and the keys stay full size. Beside the keypad, the grid fits the height. The keys shrink to the height that is left, which keeps them at least 44px on every phone.
@@ -71,7 +71,7 @@ Motion is limited to state changes and to the system's own motion. Lists animate
 
 ## Iconography
 
-Use SF Symbols on Apple platforms, at the text's weight, colored `ink` or `ink-muted`. Use `accent-ink` for a plain-button icon and `danger` for a destructive one. On other desktops, use the closest outline equivalent at a 1.5px stroke. The kinds are: SSH `terminal`, WireGuard `network`, age `lock.doc`, Passphrase `key`, Wallet `list.number`. The actions are `camera.viewfinder`, `keyboard`, `eye`, `doc.on.doc`, `square.and.arrow.up`, `printer`, `exclamationmark.lock` (the recovery sheet), `trash`. The app icon takes the place of a logo. Where the app shows the icon, as on the cover that the app switcher shows, `AppMark` draws its grid from the tokens, without the ground: `accent` dice with `on-accent` bars. Wherever a wordmark would go, set the name in `title` type.
+Use SF Symbols on Apple platforms, at the text's weight, colored `ink` or `ink-muted`. Use `accent-ink` for a plain-button icon and `danger` for a destructive one. On other desktops, use the closest outline equivalent at a 1.5px stroke. The kinds are: SSH `terminal`, WireGuard `network`, age `lock.doc`, Passphrase `key`, Wallet `list.number`. The actions are `camera.viewfinder`, `keyboard`, `eye`, `doc.on.doc`, `square.and.arrow.up`, `printer`, `exclamationmark.lock` (the recovery sheet), `trash`. The app icon takes the place of a logo. Where the app shows the icon, as on the cover that the app switcher shows, `AppMark` draws its grid from the tokens, without the ground: `accent` dice with `on-accent` bars. Wherever a wordmark would go, set the name in `title` type, as the app switcher's cover does. Home before the first DiceKey sets it in `wordmark` type.
 
 ## Tokens
 
@@ -95,7 +95,7 @@ In code, a token keeps its name in lower camel case. The color sets in `DiceKeyV
 | `die-shadow` | `rgba(0, 0, 0, 0.25)` | `rgba(0, 0, 0, 0.25)` | A die's faint shadow. |
 | `die-box` | `#142b33` | `#9fb6bd` | The ground that the 25 dice sit in. It is the opposite of the dice in each theme: 8:1 against them, and 6.5:1 against `bg-raised` in dark. |
 | `camera` | `#000000` | `#000000` | Behind the live camera image, in every theme. |
-| `camera-dim` | `rgba(0, 0, 0, 0.75)` | `rgba(0, 0, 0, 0.75)` | Darkens the camera image around the dice that the camera is reading. |
+| `camera-dim` | `rgba(0, 0, 0, 0.75)` | `rgba(0, 0, 0, 0.75)` | Darkens the camera image outside the window in its middle, while the camera reads no die. |
 | `strength-weak` | system red | system red | A passphrase's strength bar, weakest to strongest. |
 | `strength-fair` | system orange | system orange | |
 | `strength-good` | system yellow | system yellow | |
@@ -105,13 +105,14 @@ In code, a token keeps its name in lower camel case. The color sets in `DiceKeyV
 |---|---|---|
 | `display` | `.largeTitle` (navigation title) | One per screen: the screen's title. |
 | `title` | `.title2`, semibold | A DiceKey's name at the top of its screen. |
+| `wordmark` | `.largeTitle`, bold | The app's name on home before the first DiceKey. |
 | `headline` | `.headline` | A key's name in a row; the read count under the camera; button labels. |
 | `body` | `.body` | Running text and field values. |
 | `subhead` | `.subheadline` | The line under a name. |
 | `caption` | `.footnote` | Status and helper lines, in `ink-muted`. |
 | `label` | list section header | Section labels above groups, in capitals, `ink-muted`. |
 | `die` | `dice`, sized to the die | A die's letter and digit, wherever the app draws a DiceKey: grid cells, the scan overlay and the keypad. Nothing else uses it. |
-| `secret` | `.body`, monospaced | A revealed recovery phrase's words. A passphrase is `.title3` monospaced. Wraps anywhere. Never truncated. |
+| `secret` | `.body`, monospaced | A revealed recovery phrase's words. A passphrase is `.title3` monospaced. An SSH, age or WireGuard secret is `.footnote` monospaced, as `key` is, but isn't selectable. Wraps anywhere. Never truncated. |
 | `key` | `.footnote`, monospaced | Public keys and fingerprints. Selectable, wraps anywhere. |
 
 Families: `sans` is the system font. `mono` is the system monospaced font. `dice` is Inconsolata Bold (`Packages/ReadDiceKey/Sources/DiceKeySpecification/Resources/Inconsolata-Bold.otf`, registered by `PrintedFont.name`).
@@ -122,7 +123,7 @@ Families: `sans` is the system font. `mono` is the system monospaced font. `dice
 | `space-2` | 8px | Inside a footer; between a recovery phrase's words. |
 | `space-3` | 12px | Between a control and its caption; around and between the camera's controls. |
 | `space-4` | 16px | Between the parts of a screen the app stacks itself. |
-| `space-6` | 24px | Between examples in previews. |
+| `space-6` | 24px | Between examples in previews. Between the parts of home before the first DiceKey. |
 
 | Width | Value | Use |
 |---|---|---|
@@ -130,8 +131,8 @@ Families: `sans` is the system font. `mono` is the system monospaced font. `dice
 
 | Radius | Value | Use |
 |---|---|---|
-| `radius-sm` | 9px | A key's kind icon tile. |
-| `radius-md` | 16px | The camera frame. |
+| `radius-sm` | 9px | A key's kind icon tile in a row. |
+| `radius-md` | 16px | The camera frame, and a key's kind icon tile in its header. |
 
 Sheets, rows and buttons take their corners from the system. Buttons are capsules.
 
@@ -153,4 +154,4 @@ This section is the interface contract. `security.md` covers what the app stores
 
 ## Settings
 
-Settings is a sheet that opens from the gear in the toolbar of home. It is a stock form with Done in the toolbar, shown as an ✕ because every change applies at once. Under Catalog, there is a Sync with iCloud switch. Its footer says what syncs: never the dice or a secret. The footer also warns when a change waits for the next launch, when iCloud couldn't start, or when the device isn't signed in. Next, Export catalog shares the file. It is dimmed, with a footer that says to update the app, while the catalog holds a key that a newer version made. Import catalog reads a file back in (`catalog-format.md`). About shows the version, a line that says the app is unofficial, a link to dicekeys.com, and credits for the works that the app uses.
+Settings is a sheet that opens from the gear in the toolbar of home. It is a stock form with Done in the toolbar, shown as an ✕ because every change applies at once. Under Catalog, there is a Sync with iCloud switch. Its footer says what syncs: never the dice or a secret. The footer also warns when a change waits for the next launch, when iCloud couldn't start, or when the device isn't signed in. Next, Export catalog shares the file. It is dimmed, with a footer that says to update the app, while the catalog holds a key that a newer version made. Import catalog reads a file back in (`catalog-format.md`). About shows the version, a line that says the app is unofficial and a link to dicekeys.com. Credits is a section of its own that lists the works that the app uses.

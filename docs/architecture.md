@@ -120,11 +120,13 @@ TestFlight builds expire after ninety days. No setting changes this. To get a ne
 
 ## What CI covers
 
-`.github/workflows/build.yml` sets the Xcode version on GitHub-hosted macOS runners. CI covers:
+The macOS jobs in `.github/workflows/build.yml` run on the GitHub-hosted runner label `xcode-27`. They use the default Xcode of that image, and the workflow sets no Xcode version itself. CI covers:
 
 - `swift test -c release` for each package. In `Packages/Derivation`, it tests the kinds fixture, recipe validation, the key formats and RFC 5869's HKDF vectors. In `Packages/ReadDiceKey`, it tests the scanner over its photo corpus and drawn keys.
 - XcodeGen runs first. Then CI builds the iOS app for the simulator and runs its Swift Testing suite there.
+- The `unused-code` job builds the iOS app for the simulator, unsigned. Then it runs `swiftlint analyze --strict` on the build log, which reports unused declarations and imports in the app target. It leaves out `Packages`, because the package tests aren't in that build.
 - CI builds the Mac app with Mac Catalyst, unsigned. This covers the code under `targetEnvironment(macCatalyst)`, which the iOS builds skip.
 - On Ubuntu, CI runs `swift format lint --strict`, SwiftLint, ruff, shellcheck and actionlint. The toolchain formatter decides the layout, and `.swift-format` configures it. CI also runs `derive-kinds.py --tools`, which checks the public keys against `ssh-keygen`, `wg` and `age-keygen`.
+- `.github/workflows/workflow-lint.yml` runs actionlint and zizmor on a pull request, or a push to `main`, that changes a file under `.github/`.
 
 If a pull request changes only `docs/`, `scripts/` and top-level Markdown, CI skips the macOS jobs.
