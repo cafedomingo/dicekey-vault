@@ -23,7 +23,8 @@ enum KeySelection: Hashable {
 }
 
 /// Home, with every DiceKey and its keys, then whichever of them is selected. One split view
-/// for every size: a phone shows the columns as a stack.
+/// for every size: a phone shows the columns as a stack, and a large phone in landscape shows
+/// them side by side but for the scanner (`splitView`).
 struct ContentView: View {
     private static let backNavigationDuration = Duration.milliseconds(400)
 
@@ -51,71 +52,96 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Query private var records: [DiceKeyRecord]
     /// Every row, since the public keys map can't be filtered in the store.
     @Query private var entries: [KeyEntry]
 
     var body: some View {
-        NavigationSplitView(preferredCompactColumn: $compactColumn) {
-            DiceKeyList(selection: $sidebarSelection, onScan: scan, onDelete: delete)
-                .appBackdrop(dice: sizeClass == .compact)
-        } detail: {
-            NavigationStack(path: $path) {
-                detail.navigationDestination(for: KeySelection.self, destination: pushed)
+        splitView
+            .onChange(of: sidebarSelection, selectionChanged)
+            .onChange(of: compactColumn) { _, column in
+                if column == .sidebar, sidebarSelection == .scan { sidebarSelection = nil }
+            }
+            .onChange(of: sizeClass) { _, size in fitScanner(to: size) }
+            .onChange(of: isScanning) { _, isScanning in
+                if !isScanning {
+                    isTyping = false
+                    typed = TypedDiceKey()
+                }
+            }
+            .onChange(of: isDraftLocked) { _, isLocked in
+                if isLocked { closeDraft() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                switch phase {
+                case .background:
+                    unlocked.appWentToBackground()
+                    backgroundedAt = backgroundedAt ?? .now
+                case .inactive:
+                    unlocked.appReturned()
+                case .active:
+                    unlocked.appReturned()
+                    expireTyping()
+                @unknown default: break
+                }
+            }
+            .offersToKeep($diceKeyToKeep)
+            .onOpenURL { url in
+                do {
+                    catalogToImport = try CatalogFile(importURL: url)
+                } catch {
+                    self.error = PresentableError(title: "Not a Catalog", error: error)
+                }
+            }
+            .importsCatalog($catalogToImport)
+            .restoresDiceKey($codeToRestore, onRestored: { open($0) })
+            .task(id: records.count) {
+                do {
+                    try context.addMissingDefaults()
+                } catch {
+                    self.error = PresentableError(title: "Couldn't Add Default Keys", error: error)
+                }
+            }
+            .task(id: keysToFill) {
+                do {
+                    for diceKey in unlocked.diceKeys.values { try context.fillPublicKeys(for: diceKey) }
+                } catch {
+                    self.error = PresentableError(title: "Couldn't Save Public Keys", error: error)
+                }
+            }
+            .errorAlert($error)
+    }
+
+    /// Home steps aside while scanning or typing in a window too short to stack the camera or the
+    /// keypad and wide enough to show home beside them, such as a large phone in landscape: there
+    /// they need the whole width. A visibility binding instead hid home there from launch on.
+    @ViewBuilder
+    private var splitView: some View {
+        if isScanning, sizeClass == .regular, verticalSizeClass == .compact {
+            NavigationSplitView(columnVisibility: .constant(.detailOnly)) {
+                sidebar.toolbar(removing: .sidebarToggle)
+            } detail: {
+                detailStack
+            }
+        } else {
+            NavigationSplitView(preferredCompactColumn: $compactColumn) {
+                sidebar
+            } detail: {
+                detailStack
             }
         }
-        .onChange(of: sidebarSelection, selectionChanged)
-        .onChange(of: compactColumn) { _, column in
-            if column == .sidebar, sidebarSelection == .scan { sidebarSelection = nil }
+    }
+
+    private var sidebar: some View {
+        DiceKeyList(selection: $sidebarSelection, onScan: scan, onDelete: delete)
+            .appBackdrop(dice: sizeClass == .compact)
+    }
+
+    private var detailStack: some View {
+        NavigationStack(path: $path) {
+            detail.navigationDestination(for: KeySelection.self, destination: pushed)
         }
-        .onChange(of: sizeClass) { _, size in fitScanner(to: size) }
-        .onChange(of: isScanning) { _, isScanning in
-            if !isScanning {
-                isTyping = false
-                typed = TypedDiceKey()
-            }
-        }
-        .onChange(of: isDraftLocked) { _, isLocked in
-            if isLocked { closeDraft() }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            switch phase {
-            case .background:
-                unlocked.appWentToBackground()
-                backgroundedAt = backgroundedAt ?? .now
-            case .inactive:
-                unlocked.appReturned()
-            case .active:
-                unlocked.appReturned()
-                expireTyping()
-            @unknown default: break
-            }
-        }
-        .offersToKeep($diceKeyToKeep)
-        .onOpenURL { url in
-            do {
-                catalogToImport = try CatalogFile(importURL: url)
-            } catch {
-                self.error = PresentableError(title: "Not a Catalog", error: error)
-            }
-        }
-        .importsCatalog($catalogToImport)
-        .restoresDiceKey($codeToRestore, onRestored: { open($0) })
-        .task(id: records.count) {
-            do {
-                try context.addMissingDefaults()
-            } catch {
-                self.error = PresentableError(title: "Couldn't Add Default Keys", error: error)
-            }
-        }
-        .task(id: keysToFill) {
-            do {
-                for diceKey in unlocked.diceKeys.values { try context.fillPublicKeys(for: diceKey) }
-            } catch {
-                self.error = PresentableError(title: "Couldn't Save Public Keys", error: error)
-            }
-        }
-        .errorAlert($error)
     }
 
     @ViewBuilder

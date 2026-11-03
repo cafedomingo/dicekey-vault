@@ -84,7 +84,11 @@ flowchart LR
 The camera delivers bi-planar Y'CbCr. Its first plane is luma, which already is the grayscale
 image the scanner needs, so the scanner takes the centered square of it (what the square
 preview shows) with one copy per row. AVFoundation rotates the buffers to match the preview
-before they arrive, so the scanner works in the coordinates the user sees.
+before they arrive, so the scanner works in the coordinates the user sees. The rotation
+coordinator's preview angle keeps the picture level with the horizon, and the interface turns
+with the device in every orientation it supports (portrait and both landscapes on an iPhone,
+every way on an iPad), so the frame is upright on the screen as held: the key's first row is the
+one nearest the top of the screen.
 
 ### 2. Finding bars (`Bars.swift`, `Regions.swift`)
 
