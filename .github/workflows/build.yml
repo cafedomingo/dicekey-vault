@@ -66,6 +66,29 @@ jobs:
       - name: actionlint
         uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0
 
+  # A pull request that changes only docs and scripts skips the macOS jobs; lint covers
+  # scripts. A job skipped by its `if:` passes as a required check, where a path filter on
+  # the workflow would leave the checks pending. When `changes` fails or is skipped, as on a
+  # push to main, every job runs.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      app: ${{ steps.files.outputs.app }}
+    steps:
+      - id: files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate \
+            --jq '.[] | .filename, .previous_filename // empty')
+          if grep -qvE '^(docs|scripts)/|\.md$' <<< "$files"; then app=true; else app=false; fi
+          echo "app=$app" >> "$GITHUB_OUTPUT"
+
   # Both local packages with plain SwiftPM on the macOS host, in one job because each
   # takes about a minute and a macOS runner costs half that just to start. Derivation:
   # kinds.json from scripts/derive-kinds.py (the tripwire for any change to derived secrets),
@@ -73,6 +96,8 @@ jobs:
   # over its photo corpus, built optimized because the full-size photos take minutes at
   # -Onone and seconds at -O.
   packages:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: xcode-27
     timeout-minutes: 45
     permissions:
@@ -89,6 +114,8 @@ jobs:
         run: swift test -c release -Xswiftc -enable-testing --parallel
 
   unused-code:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: xcode-27
     timeout-minutes: 45
     permissions:
@@ -123,6 +150,8 @@ jobs:
           retention-days: 7
 
   catalyst:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: xcode-27
     timeout-minutes: 45
     permissions:
@@ -151,6 +180,8 @@ jobs:
           retention-days: 7
 
   app-tests:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
     runs-on: xcode-27
     timeout-minutes: 60
     permissions:
