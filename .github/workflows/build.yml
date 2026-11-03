@@ -1,9 +1,7 @@
 name: Build
 
-# Pushes to main, and every pull request, whichever branch it targets, so a stacked PR is
-# checked too. A branch push that is also a PR would otherwise run every job twice (the
-# push and the pull_request event), and the concurrency group cannot merge them because the
-# two events have different refs.
+# Every PR, whatever its base, so stacked PRs are checked. Pushes only to main: a branch's push
+# and its PR would both run, and concurrency can't merge them since their refs differ.
 on:
   push:
     branches: [ main ]
@@ -17,7 +15,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Nothing here needs Xcode, and an Ubuntu runner starts in seconds and costs a tenth.
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -34,7 +31,7 @@ jobs:
           "$RUNNER_TEMP/lint/bin/pip" install -r scripts/requirements-lint.txt
           echo "$RUNNER_TEMP/lint/bin" >> "$GITHUB_PATH"
       - name: swift-format
-        # Not scripts: the formatter folds the comment lines after a shebang into it, one per run.
+        # Not scripts: swift-format folds the comments after a shebang into it, a line per run.
         run: swift format lint --strict --recursive DiceKeyVault Packages Tests BuildTools/Package.swift
       - name: SwiftLint
         run: swiftlint lint --strict --reporter github-actions-logging
@@ -44,10 +41,8 @@ jobs:
         run: ruff format --check scripts
       - name: shellcheck
         run: shellcheck scripts/*.sh scripts/*/*.sh
-      # kinds.json comes from the independent Python implementation; the real tools and the
-      # BIP39 reference read every key back, and the Swift tests then match it on macOS.
-      # Post-quantum age needs age 1.3, newer than Ubuntu's, so it comes from age's release,
-      # pinned by the hash of the tarball whose Sigsum proof was checked when it was pinned.
+      # Post-quantum age needs 1.3, newer than Ubuntu's: the release tarball, pinned by the hash
+      # it had when its Sigsum proof was checked.
       - name: Key kinds
         env:
           AGE_VERSION: v1.3.2
@@ -62,15 +57,12 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/kinds"
           "$RUNNER_TEMP/kinds/bin/pip" install -r scripts/requirements.txt
           PATH="$RUNNER_TEMP/age:$PATH" "$RUNNER_TEMP/kinds/bin/python" scripts/derive-kinds.py --tools
-      # actionlint also runs shellcheck over each workflow `run:` block.
       - name: actionlint
         uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0
 
-  # A pull request that changes only docs, scripts and top-level Markdown skips the macOS
-  # jobs; lint covers scripts. Markdown elsewhere can land in a bundle, as XcodeGen copies
-  # files it doesn't know. A job skipped by its `if:` passes as a required check, where a path
-  # filter on the workflow would leave the checks pending. When `changes` fails or is
-  # skipped, as on a push to main, every job runs.
+  # PRs that change only docs/, scripts/ and top-level Markdown skip the macOS jobs; XcodeGen
+  # bundles Markdown elsewhere. An `if:` rather than a path filter, which leaves required checks
+  # pending. If `changes` fails or is skipped, as on a push to main, every job runs.
   changes:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -90,12 +82,8 @@ jobs:
           if grep -qvE '^(docs|scripts)/|^[^/]*\.md$' <<< "$files"; then app=true; else app=false; fi
           echo "app=$app" >> "$GITHUB_OUTPUT"
 
-  # Both local packages with plain SwiftPM on the macOS host, in one job because each
-  # takes about a minute and a macOS runner costs half that just to start. Derivation:
-  # kinds.json from scripts/derive-kinds.py (the tripwire for any change to derived secrets),
-  # recipe validation, the key formats and RFC 5869's HKDF vectors. ReadDiceKey: the scanner
-  # over its photo corpus, built optimized because the full-size photos take minutes at
-  # -Onone and seconds at -O.
+  # One job: each package takes about a minute, and a macOS runner half that just to start.
+  # Release builds: the scanner's photo corpus takes minutes at -Onone and seconds at -O.
   packages:
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.app != 'false' }}
@@ -135,12 +123,10 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM= 2>&1 | tee build-ios.log | grep --line-buffered -E 'error:|warning: unre|^Ld |BUILD|\*\*' || true
           grep -q 'BUILD SUCCEEDED' build-ios.log
-      # .swiftlint-analyze.yml limits it to the app target.
       - name: Unused code (swiftlint analyze)
         run: |
           swiftlint analyze --strict --config .swiftlint.yml --config .swiftlint-analyze.yml \
             --compiler-log-path build-ios.log --reporter github-actions-logging
-      # Diagnostics only: a flaky artifact service must not fail a build that passed.
       - name: Upload logs
         if: always()
         continue-on-error: true
@@ -196,8 +182,7 @@ jobs:
         run: swift run --package-path BuildTools xcodegen generate
       - name: Pick a simulator
         run: |
-          # The newest available iPhone, by UDID: names alone can be ambiguous across runtimes
-          # on the hosted runners.
+          # The newest iPhone, by UDID: names repeat across runtimes.
           UDID=$(xcrun simctl list devices available -j | python3 -c '
           import json,sys,re
           devices=json.load(sys.stdin)["devices"]
@@ -217,13 +202,11 @@ jobs:
       - name: Build for testing
         run: |
           set -o pipefail
-          # Ad-hoc signing: with no entitlements the app has no keychain access at all and
-          # every SecItem call fails with errSecMissingEntitlement (-34018).
+          # Ad hoc, not unsigned: unsigned, keychain calls fail with errSecMissingEntitlement.
           xcodebuild build-for-testing -project DiceKeyVault.xcodeproj -scheme DiceKeyVault \
             -destination "platform=iOS Simulator,id=$UDID" \
             CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= 2>&1 | tee build-ios.log | grep --line-buffered -E 'error:|warning: unre|^Ld |BUILD|\*\*' || true
           grep -q 'BUILD SUCCEEDED' build-ios.log
-      # Its duration is the simulator's install-and-launch time plus the tests themselves.
       - name: Test without building
         run: |
           set -o pipefail
