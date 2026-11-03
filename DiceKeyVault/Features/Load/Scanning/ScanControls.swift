@@ -11,11 +11,11 @@ import SwiftUI
 struct ScanControls: View {
     let cameras: [AVCaptureDevice]
     @Binding var selectedCameraID: String?
+    @Binding var torchOn: Bool
 
     @Namespace private var glassNamespace
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var torchOn = false
 
     private var selectedCamera: AVCaptureDevice? {
         cameras.first { $0.uniqueID == selectedCameraID }
@@ -55,7 +55,7 @@ struct ScanControls: View {
                             .font(.title3)
                             .frame(width: 44, height: 44)
                     }
-                    .accessibilityLabel(torchOn ? "Turn torch off" : "Turn torch on")
+                    .accessibilityLabel(torchOn ? "Turn flashlight off" : "Turn flashlight on")
                     .modifier(
                         GlassControl(
                             id: "torch", namespace: glassNamespace, reduceTransparency: reduceTransparency,
@@ -110,8 +110,9 @@ private struct GlassControl: ViewModifier {
 
 #Preview {
     @Previewable @State var selected: String?
+    @Previewable @State var torchOn = false
     ZStack {
         Color.camera
-        ScanControls(cameras: [], selectedCameraID: $selected)
+        ScanControls(cameras: [], selectedCameraID: $selected, torchOn: $torchOn)
     }
 }

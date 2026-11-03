@@ -6,34 +6,18 @@
 import AVFoundation
 import SwiftUI
 
-/// The camera preview with the read-faces overlay and floating controls.
-/// Calls `onDiceKeyRead` once, when a complete DiceKey has been scanned, and `onCodeRead`
-/// with each different code that comes into view.
+/// The camera preview with the read-faces overlay and floating controls. What it reads is
+/// acted on by whoever holds `scanner`.
 struct ScanDiceKeyView: View {
-    let onDiceKeyRead: (_ diceKey: DiceKey) -> Void
-    let onCodeRead: (_ payload: String) -> Void
-
-    @State private var scanModel = DiceKeyScanModel()
-    @State private var cameraAuthorized: Bool?
-    @State private var selectedCameraID: String?
-    @State private var cameraError: PresentableError?
-    @Environment(\.scenePhase) private var scenePhase
+    @Bindable var scanner: ScannerState
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-
-    /// Discovered once and again when a camera connects or disconnects, not per render:
-    /// the body re-evaluates on every scanned frame.
-    @State private var cameras: [AVCaptureDevice] = []
-
-    private var selectedCamera: AVCaptureDevice? {
-        cameras.first { $0.uniqueID == selectedCameraID }
-    }
 
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            switch cameraAuthorized {
+            switch scanner.cameraAuthorized {
             case .some(true):
                 layout {
-                    scanner.layoutPriority(isCompactHeight ? 1 : 0)
+                    camera.layoutPriority(isCompactHeight ? 1 : 0)
                     status
                 }
             case .some(false):
@@ -47,35 +31,22 @@ struct ScanDiceKeyView: View {
             }
         }
         .task {
-            cameraAuthorized = await ActiveCameras.requestAccessIfNeeded()
-            cameras = ActiveCameras.get()
+            scanner.cameraAuthorized = await ActiveCameras.requestAccessIfNeeded()
+            scanner.cameras = ActiveCameras.get()
         }
         // The first camera, until one is chosen, and again if the chosen one goes away.
-        .onChange(of: cameras) { _, cameras in
-            if !cameras.contains(where: { $0.uniqueID == selectedCameraID }) {
-                selectedCameraID = cameras.first?.uniqueID
+        .onChange(of: scanner.cameras) { _, cameras in
+            if !cameras.contains(where: { $0.uniqueID == scanner.selectedCameraID }) {
+                scanner.selectedCameraID = cameras.first?.uniqueID
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: AVCaptureDevice.wasConnectedNotification)) { _ in
-            cameras = ActiveCameras.get()
+            scanner.cameras = ActiveCameras.get()
         }
         .onReceive(NotificationCenter.default.publisher(for: AVCaptureDevice.wasDisconnectedNotification)) { _ in
-            cameras = ActiveCameras.get()
+            scanner.cameras = ActiveCameras.get()
         }
-        .onChange(of: scanModel.completedDiceKey) { _, diceKey in
-            if let diceKey {
-                onDiceKeyRead(diceKey)
-            }
-        }
-        .onChange(of: scanModel.code) { _, code in
-            if let code {
-                onCodeRead(code)
-            }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .background { scanModel.forgetCode() }
-        }
-        .errorAlert($cameraError)
+        .errorAlert($scanner.cameraError)
     }
 
     private var isCompactHeight: Bool { verticalSizeClass == .compact }
@@ -89,12 +60,12 @@ struct ScanDiceKeyView: View {
 
     private var status: some View {
         VStack(spacing: 0) {
-            Text("\(scanModel.facesRead) of \(DiceKey.faceCount) dice read")
+            Text("\(scanner.model.facesRead) of \(DiceKey.faceCount) dice read")
                 .font(.headline)
                 .monospacedDigit()
                 .fixedSize()
             Text(
-                scanModel.hasRepeatedLetters
+                scanner.model.hasRepeatedLetters
                     ? "Two dice share a letter, so these aren't one DiceKey. Check for a die from another set."
                     : "Hold the box flat, lid off, or show a list card or recovery sheet"
             )
@@ -105,24 +76,19 @@ struct ScanDiceKeyView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var scanner: some View {
+    private var camera: some View {
         GeometryReader { reader in
             let size = CGSize(width: reader.size.width, height: reader.size.width)
             ZStack(alignment: .bottom) {
-                CameraPreviewView(
-                    camera: selectedCamera,
-                    size: size,
-                    onFrame: { [scanModel] frame in scanModel.apply(frame) },
-                    onFailure: { error in
-                        cameraError = PresentableError(title: "Camera Unavailable", error: error)
-                    }
-                )
+                CameraPreviewView(preview: scanner.preview, camera: scanner.selectedCamera)
                 FacesReadOverlay(
                     renderedSize: size,
-                    dice: scanModel.dice,
-                    imageFrameSize: scanModel.imageFrameSize
+                    dice: scanner.model.dice,
+                    imageFrameSize: scanner.model.imageFrameSize
                 )
-                ScanControls(cameras: cameras, selectedCameraID: $selectedCameraID)
+                ScanControls(
+                    cameras: scanner.cameras, selectedCameraID: $scanner.selectedCameraID,
+                    torchOn: $scanner.torchOn)
             }
             .frame(width: size.width, height: size.height)
         }
@@ -134,5 +100,5 @@ struct ScanDiceKeyView: View {
 }
 
 #Preview {
-    ScanDiceKeyView(onDiceKeyRead: { _ in }, onCodeRead: { _ in })
+    ScanDiceKeyView(scanner: ScannerState())
 }

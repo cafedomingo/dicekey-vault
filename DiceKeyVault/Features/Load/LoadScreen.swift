@@ -11,19 +11,19 @@ import SwiftUI
 struct LoadScreen: View {
     /// The window's size class, not this column's, which can report its own.
     let isCompact: Bool
-    /// This and `typed` are held by the caller, since a resize can move this screen and start a
-    /// new one.
+    /// This, `typed` and `scanner` are held by the caller, since a resize can move this screen and
+    /// start a new one.
     @Binding var isTyping: Bool
     let typed: TypedDiceKey
+    let scanner: ScannerState
     let onLoaded: (DiceKey) -> Void
-    let onCodeRead: (String) -> Void
 
     var body: some View {
         Group {
             if isTyping {
                 TypingView(typed: typed, onDone: onLoaded)
             } else {
-                ScanDiceKeyView(onDiceKeyRead: onLoaded, onCodeRead: onCodeRead)
+                ScanDiceKeyView(scanner: scanner)
             }
         }
         .padding()
