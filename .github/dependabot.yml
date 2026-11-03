@@ -7,6 +7,10 @@ updates:
     cooldown:
       default-days: 7
     labels: ["dependencies"]
+    groups:
+      swift:
+        patterns: ["*"]
+        update-types: [minor, patch]
   - package-ecosystem: "pip"
     directory: "/scripts"
     schedule:
@@ -14,6 +18,10 @@ updates:
     cooldown:
       default-days: 7
     labels: ["dependencies"]
+    groups:
+      pip:
+        patterns: ["*"]
+        update-types: [minor, patch]
   - package-ecosystem: "github-actions"
     directories: ["/", "/.github/actions/*"]
     schedule:
@@ -24,3 +32,4 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+        update-types: [minor, patch]
