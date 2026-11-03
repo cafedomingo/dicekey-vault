@@ -10,8 +10,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 env:
   DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
@@ -20,14 +19,20 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# The ./ form of the local action is kept (zizmor self-repository ignores below): actionlint 1.7.12
+# rejects the $/ form.
 jobs:
   # Nothing here needs Xcode, and an Ubuntu runner starts in seconds and costs a tenth.
   lint:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
       - name: Install linters
         run: |
           python3 -m venv "$RUNNER_TEMP/lint"
@@ -75,8 +80,12 @@ jobs:
   packages:
     runs-on: macos-26
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Derivation
         working-directory: Packages/Derivation
         run: swift test -c release -Xswiftc -enable-testing --parallel
@@ -87,9 +96,13 @@ jobs:
   unused-code:
     runs-on: macos-26
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build iOS app (simulator)
@@ -108,7 +121,7 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unused-code-logs
           path: "*.log"
@@ -117,9 +130,13 @@ jobs:
   catalyst:
     runs-on: macos-26
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build Mac app (Catalyst)
@@ -132,7 +149,7 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: catalyst-logs
           path: "*.log"
@@ -141,9 +158,13 @@ jobs:
   app-tests:
     runs-on: macos-26
     timeout-minutes: 60
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Pick a simulator
@@ -186,7 +207,7 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-tests-logs
           path: |
