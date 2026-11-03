@@ -4,17 +4,32 @@ updates:
     directory: "/BuildTools"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels: ["dependencies"]
+    groups:
+      swift:
+        patterns: ["*"]
+        update-types: [minor, patch]
   - package-ecosystem: "pip"
     directory: "/scripts"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels: ["dependencies"]
+    groups:
+      pip:
+        patterns: ["*"]
+        update-types: [minor, patch]
   - package-ecosystem: "github-actions"
     directories: ["/", "/.github/actions/*"]
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels: ["dependencies"]
     groups:
       github-actions:
         patterns: ["*"]
+        update-types: [minor, patch]

@@ -92,11 +92,20 @@ the DiceKey on this device.
 
 ## On screen
 
-The app switcher shows a plain cover, put up synchronously when the scene backgrounds so the
-snapshot never holds a secret. The DiceKey's grid starts concealed. A screenshot can't be
-blocked; the app hides any revealed secret afterwards so it doesn't catch the next one. Typed
-dice are dropped when the app comes back the lock delay or more after leaving, as an unlocked
-DiceKey is.
+The app switcher shows a plain cover, put up synchronously when the scene backgrounds, which
+is when UIKit takes the switcher's snapshot (Apple's QA1838), so the snapshot it keeps holds
+no secret. The DiceKey's grid starts concealed, and hides again on leaving the app, capture
+or a screenshot. A screenshot can't be blocked; the app hides any revealed secret afterwards
+so it doesn't catch the next one. Typed dice are dropped when the app comes back the lock
+delay or more after leaving, as an unlocked DiceKey is.
+
+Before the cover goes up, the switcher can briefly show the screen as it was, as in other
+password managers. A revealed secret and the grid are gone by then, since they hide as soon
+as the app stops being active, but typed dice and the camera's view stay until the scene
+backgrounds. Apple has no app API for more: `privacySensitive()` is applied by the system
+only for widgets on the Lock Screen and Always On displays. Putting the content inside a
+secure text field's layer would block screenshots, recording and snapshots, but it is
+undocumented and can break with any iOS release, so the app doesn't do it.
 
 ## Limits
 
