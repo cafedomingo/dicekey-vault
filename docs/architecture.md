@@ -156,3 +156,6 @@ check the record type has it (`CD_KeyEntry` has `CD_publicKeys`, for instance).
 - On Ubuntu: `swift format lint --strict` (layout is the toolchain formatter's, configured in
   `.swift-format`), SwiftLint, ruff, shellcheck and actionlint, and `derive-kinds.py --tools`,
   which checks the public keys against `ssh-keygen`, `wg` and `age-keygen`.
+
+A pull request that changes only `docs/`, `scripts/` and top-level Markdown skips the macOS
+jobs.
