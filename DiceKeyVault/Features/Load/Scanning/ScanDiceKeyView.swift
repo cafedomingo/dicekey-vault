@@ -18,6 +18,7 @@ struct ScanDiceKeyView: View {
     @State private var selectedCameraID: String?
     @State private var cameraError: PresentableError?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     /// Discovered once and again when a camera connects or disconnects, not per render:
     /// the body re-evaluates on every scanned frame.
@@ -31,19 +32,10 @@ struct ScanDiceKeyView: View {
         VStack(alignment: .center, spacing: 0) {
             switch cameraAuthorized {
             case .some(true):
-                scanner
-                Text("\(scanModel.facesRead) of \(DiceKey.faceCount) dice read")
-                    .font(.headline)
-                    .monospacedDigit()
-                    .padding(.top, .space3)
-                Text(
-                    scanModel.hasRepeatedLetters
-                        ? "Two dice share a letter, so these aren't one DiceKey. Check for a die from another set."
-                        : "Hold the box flat, lid off, or show a list card or recovery sheet"
-                )
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+                layout {
+                    scanner.layoutPriority(isCompactHeight ? 1 : 0)
+                    status
+                }
             case .some(false):
                 ContentUnavailableView(
                     "Camera Access Needed",
@@ -84,6 +76,33 @@ struct ScanDiceKeyView: View {
             if phase == .background { scanModel.forgetCode() }
         }
         .errorAlert($cameraError)
+    }
+
+    private var isCompactHeight: Bool { verticalSizeClass == .compact }
+
+    /// The status sits beside the camera in a compact-height window, such as a phone in landscape,
+    /// where the camera is sized first so it fills the height, and under it otherwise. One layout
+    /// either way, so the camera keeps running through a turn.
+    private var layout: AnyLayout {
+        isCompactHeight ? AnyLayout(HStackLayout(spacing: .space4)) : AnyLayout(VStackLayout(spacing: .space3))
+    }
+
+    private var status: some View {
+        VStack(spacing: 0) {
+            Text("\(scanModel.facesRead) of \(DiceKey.faceCount) dice read")
+                .font(.headline)
+                .monospacedDigit()
+                .fixedSize()
+            Text(
+                scanModel.hasRepeatedLetters
+                    ? "Two dice share a letter, so these aren't one DiceKey. Check for a die from another set."
+                    : "Hold the box flat, lid off, or show a list card or recovery sheet"
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var scanner: some View {

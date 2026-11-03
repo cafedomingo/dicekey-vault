@@ -3,9 +3,9 @@
 //  DiceKeyVaultUITests
 //
 //  Walks every screen the Simulator can reach and saves a screenshot at each stop, so a
-//  visual change can be judged screen by screen in both appearances and, on an iPad, both
-//  orientations. Run it with scripts/screen-walk.sh, which sets the appearance before each run:
-//  the Simulator ignores an appearance change made while a UI test is running. Not part of CI;
+//  visual change can be judged screen by screen in both appearances and both orientations. Run
+//  it with scripts/screen-walk.sh, which sets the appearance before each run: the Simulator
+//  ignores an appearance change made while a UI test is running. Not part of CI;
 //  the stops are found by their labels and will need updating when a screen changes.
 //
 
@@ -70,8 +70,8 @@ final class ScreenWalk: XCTestCase {
     }
 
     /// Swipes up over the detail's list, the last in the tree: `app.swipeUp()` didn't scroll the
-    /// capped detail on an iPad in landscape. Not `isHittable`: the key screen reports false for
-    /// it while it is plainly on screen.
+    /// capped detail in landscape. Not `isHittable`: the key screen reports false for it while it
+    /// is plainly on screen.
     private func swipeUpDetail() {
         (app.collectionViews.allElementsBoundByIndex.last { $0.exists } ?? app).swipeUp()
     }
@@ -150,9 +150,21 @@ final class ScreenWalk: XCTestCase {
         let row = app.cells.containing(.staticText, identifier: text).firstMatch
         let window = app.windows.firstMatch
         for _ in 0..<Self.rowScrollLimit where !(row.exists && window.frame.contains(row.frame)) {
-            app.swipeUp()
+            swipeUpDetail()
         }
         return row
+    }
+
+    /// Taps through to a screen behind Face ID. The simulator offers Face ID on an iPhone only in
+    /// portrait, and asks for the passcode in landscape, so a landscape walk holds the phone upright
+    /// until `screen` is up.
+    private func authenticating(until screen: XCUIElement, _ action: () -> Void) -> Bool {
+        let turns = orientation == .landscape && UIDevice.current.userInterfaceIdiom == .phone
+        if turns { XCUIDevice.shared.orientation = .portrait }
+        action()
+        let isShown = screen.waitForExistence(timeout: 10)
+        if turns { XCUIDevice.shared.orientation = orientation.device }
+        return isShown
     }
 
     /// A key with a public half previews it as you type; the others preview behind Show.
@@ -240,9 +252,11 @@ final class ScreenWalk: XCTestCase {
         snap("list-card-print", settle: 2)
         tap(button("Cancel"), "Cancel print")
         tap(button("Done"), "Done list card")
-        openMenu()
-        tap(button("Recovery sheet"), "Recovery sheet")
-        if app.navigationBars["Recovery sheet"].waitForExistence(timeout: 10) {
+        let isRecoverySheetUp = authenticating(until: app.navigationBars["Recovery sheet"]) {
+            openMenu()
+            tap(button("Recovery sheet"), "Recovery sheet")
+        }
+        if isRecoverySheetUp {
             snap("recovery-sheet-concealed", settle: 1.5)
             openMenu()
             tap(button("Show"), "Show sheet")

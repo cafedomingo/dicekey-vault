@@ -36,7 +36,9 @@ driver of `scripts/compare-upstream/`.
 (`DiceKeyList`, home) lists every DiceKey with its keys and picks a DiceKey, a key or New key;
 the detail column is a `NavigationStack` showing that, with a key or New key opened from a
 `DiceKeyScreen` pushed over it. Beside home the scanner is pushed over whatever the column
-shows. A phone shows the same columns as a stack, and selects the scanner in place of home.
+shows. A phone shows the same columns as a stack, and selects the scanner in place of home. A
+large phone in landscape shows them side by side, but hides home while the scanner is open,
+since the camera and the keypad need the whole width there.
 
 - **`UnlockedDiceKeys`** (`@Observable`) is the only holder of DiceKeys in memory. The one in
   use, the last opened or unlocked, stays unlocked while the app is open, home included; any

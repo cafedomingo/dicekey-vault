@@ -41,9 +41,7 @@ struct NewKeyScreen: View {
                             Label(kind.title, systemImage: kind.symbol).tag(kind)
                         }
                     }
-                    TextField("Name", text: $name, prompt: Text("github, homelab, nas"))
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                    NameField(prompt: "github, homelab, nas", text: $name)
                         .id(Self.nameRow)
                     if let existing {
                         Button("Open it", systemImage: "arrow.forward") { onSaved(existing) }
@@ -106,6 +104,36 @@ struct NewKeyScreen: View {
         } catch {
             self.error = PresentableError(title: "Couldn't Save", error: error)
         }
+    }
+}
+
+/// A UIKit field, because SwiftUI can't turn off smart punctuation or smart insert and delete,
+/// which turn `'` into `’` and `--` into `—` and add spaces around a paste: the name is part
+/// of the key, and a keyboard without them can't type it back. Return dismisses the keyboard,
+/// as in SwiftUI's field, because the field has an action for ending on Return.
+private struct NameField: UIViewRepresentable {
+    let prompt: String
+    @Binding var text: String
+
+    func makeUIView(context: Context) -> UITextField {
+        let field = UITextField()
+        field.placeholder = prompt
+        field.accessibilityLabel = "Name"
+        field.font = .preferredFont(forTextStyle: .body)
+        field.adjustsFontForContentSizeCategory = true
+        field.autocorrectionType = .no
+        field.autocapitalizationType = .none
+        field.smartQuotesType = .no
+        field.smartDashesType = .no
+        field.smartInsertDeleteType = .no
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.addAction(UIAction { text = ($0.sender as? UITextField)?.text ?? "" }, for: .editingChanged)
+        field.addAction(UIAction { _ in }, for: .editingDidEndOnExit)
+        return field
+    }
+
+    func updateUIView(_ field: UITextField, context: Context) {
+        if field.text != text { field.text = text }
     }
 }
 
