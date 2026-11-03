@@ -10,11 +10,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-env:
-  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+permissions: {}
 
 concurrency:
   group: build-${{ github.ref }}
@@ -23,11 +19,15 @@ concurrency:
 jobs:
   # Nothing here needs Xcode, and an Ubuntu runner starts in seconds and costs a tenth.
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/build-tools
       - name: Install linters
         run: |
           python3 -m venv "$RUNNER_TEMP/lint"
@@ -64,7 +64,7 @@ jobs:
           PATH="$RUNNER_TEMP/age:$PATH" "$RUNNER_TEMP/kinds/bin/python" scripts/derive-kinds.py --tools
       # actionlint also runs shellcheck over each workflow `run:` block.
       - name: actionlint
-        run: actionlint
+        uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0
 
   # Both local packages with plain SwiftPM on the macOS host, in one job because each
   # takes about a minute and a macOS runner costs half that just to start. Derivation:
@@ -73,10 +73,14 @@ jobs:
   # over its photo corpus, built optimized because the full-size photos take minutes at
   # -Onone and seconds at -O.
   packages:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Derivation
         working-directory: Packages/Derivation
         run: swift test -c release -Xswiftc -enable-testing --parallel
@@ -85,11 +89,15 @@ jobs:
         run: swift test -c release -Xswiftc -enable-testing --parallel
 
   unused-code:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build iOS app (simulator)
@@ -108,18 +116,22 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unused-code-logs
           path: "*.log"
           retention-days: 7
 
   catalyst:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build Mac app (Catalyst)
@@ -132,18 +144,22 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: catalyst-logs
           path: "*.log"
           retention-days: 7
 
   app-tests:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 60
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-tools
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Pick a simulator
@@ -186,7 +202,7 @@ jobs:
       - name: Upload logs
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-tests-logs
           path: |
