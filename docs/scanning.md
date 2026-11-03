@@ -571,3 +571,4 @@ and AprilTags, and those detectors are hand-written for their markers too.
   frame; moving the phone brings them back.
 - A die turned over while the key is being scanned is noticed only when a frame reads it
   again. Until then the scanner keeps the face it read before.
+
