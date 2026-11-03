@@ -40,12 +40,16 @@ struct ContentView: View {
     @State private var codeToRestore: RecoveryCode?
     /// The DiceKey a scan or typing just recorded for the first time, while its screen stays open.
     @State private var newDiceKeyID: String?
-    /// The scanner's typing, kept here through a resize that moves the scanner between the
-    /// selection and a push. Dropped when the scanner closes, and once the app has been in the
-    /// background as long as an unlocked DiceKey may be, since half a DiceKey is still most of a
-    /// secret.
+    /// The scanner's typing, kept here through a resize that starts a new scanner, by moving it
+    /// between the selection and a push or by swapping `splitView`. Dropped when the scanner
+    /// closes, and once the app has been in the background as long as an unlocked DiceKey may be,
+    /// since half a DiceKey is still most of a secret.
     @State private var isTyping = false
     @State private var typed = TypedDiceKey()
+    /// The scanner's camera and what it has read, kept here for the same reason, so the camera
+    /// keeps running. Its reads are acted on here, once, however many scanner screens are up.
+    /// Closed when the camera leaves the screen, for typing or with the scanner.
+    @State private var scanner = ScannerState()
     @State private var backgroundedAt: Date?
     @Environment(UnlockedDiceKeys.self) private var unlocked
     @Environment(SavedDiceKeys.self) private var saved
@@ -70,6 +74,18 @@ struct ContentView: View {
                     typed = TypedDiceKey()
                 }
             }
+            .onChange(of: isCameraOpen) { _, isOpen in
+                if !isOpen {
+                    scanner.close()
+                    scanner = ScannerState()
+                }
+            }
+            .onChange(of: scanner.model.completedDiceKey) { _, diceKey in
+                if let diceKey { load(diceKey) }
+            }
+            .onChange(of: scanner.model.code) { _, code in
+                if let code { read(code) }
+            }
             .onChange(of: isDraftLocked) { _, isLocked in
                 if isLocked { closeDraft() }
             }
@@ -77,6 +93,7 @@ struct ContentView: View {
                 switch phase {
                 case .background:
                     unlocked.appWentToBackground()
+                    scanner.model.forgetCode()
                     backgroundedAt = backgroundedAt ?? .now
                 case .inactive:
                     unlocked.appReturned()
@@ -198,8 +215,8 @@ struct ContentView: View {
 
     private var loadScreen: some View {
         LoadScreen(
-            isCompact: sizeClass == .compact, isTyping: $isTyping, typed: typed, onLoaded: load,
-            onCodeRead: read)
+            isCompact: sizeClass == .compact, isTyping: $isTyping, typed: typed, scanner: scanner,
+            onLoaded: load)
     }
 
     @ViewBuilder
@@ -253,6 +270,8 @@ struct ContentView: View {
     private var isScanning: Bool {
         sidebarSelection == .scan || path.contains(.scan)
     }
+
+    private var isCameraOpen: Bool { isScanning && !isTyping }
 
     /// Clears the pushed screens, which belong to the old selection, except when widening has just
     /// moved the camera from the selection to a push.
