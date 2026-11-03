@@ -53,7 +53,7 @@ A recipe says what to derive. It is JSON, and the derivation hashes its text:
 The fields are `kind` (`ssh`, `wireguard`, `age`, `passphrase` or `wallet`) and `name`. A
 passphrase also has `length` and `list`. A memorable passphrase also has `separator` and
 `uppercase` (see Passphrases). A recipe has nothing else. Only the default keys have no
-`name` (see Default keys). The types are not in the JSON. The kind decides them.
+`name` (see Default keys). The types aren't in the JSON. The kind decides them.
 
 **One spelling.** A recipe is written as RFC 8785 (JCS) canonical JSON, with these rules:
 
@@ -69,10 +69,10 @@ That check refuses all of these:
 
 - reordered keys
 - whitespace
-- escapes that are not necessary
+- escapes that aren't necessary
 - duplicate, missing or unknown fields
 - `24.0` for `24`
-- a name that is not already trimmed and normalized
+- a name that isn't already trimmed and normalized
 
 **Names** follow these rules. The app trims a name at both ends of Unicode `White_Space`
 (U+0009–000D, 0020, 0085, 00A0, 1680, 2000–200A, 2028, 2029, 202F, 205F, 3000). It
@@ -80,12 +80,12 @@ normalizes the name to NFC. A name is 1 to 64 scalars long. A name may not hold 
 
 - a control character (`Cc`)
 - a format character (`Cf`) other than the zero-width joiner, which most emoji sequences need
-- a code point that Unicode has not assigned (`Cn`)
+- a code point that Unicode hasn't assigned (`Cn`)
 
 So these rules refuse an emoji built from tag characters, such as a subdivision flag.
 Invisible characters would let two names that print the same derive different keys. An
 unassigned code point could normalize differently once Unicode assigns it. NFC is stable for
-assigned characters. Otherwise a name is exactly as typed. `'` is not `’`. A different capital
+assigned characters. Otherwise a name is exactly as typed. `'` isn't `’`. A different capital
 or a different inner space gives a different key.
 
 The unassigned check follows the Unicode tables of each platform. So a device refuses a name
@@ -128,7 +128,7 @@ The rules for algorithms:
 - The order is emphasis only, and it may change, since nothing stored depends on it.
 
 **Encodings.** These turn key bytes into the text that each tool reads. They are standard
-formats, and kinds.json pins them. They are not key material. A change to an encoding would
+formats, and kinds.json pins them. They aren't key material. A change to an encoding would
 leave the key the same and change the exported text.
 
 - **ssh**:
@@ -170,7 +170,7 @@ A passphrase's style is part of its recipe. So it is part of the key.
   words with hyphens. `digits` joins them with digits.
 - `uppercase` is for memorable only. `true` writes one whole word in capitals. It goes with
   `"separator":"digits"` and only with it. So a memorable recipe has two forms: `-` without
-  `uppercase`, and `digits` with `"uppercase":true`. Anything else is not a recipe, and that
+  `uppercase`, and `digits` with `"uppercase":true`. Anything else isn't a recipe, and that
   includes `false`.
 
 The type is `passphrase`, and L is 8 bytes per character or word. Each entry is one 8-byte
@@ -216,8 +216,8 @@ has no name to make its key again and synced catalogs hold its rows. You change 
 by adding a literal. An added literal reaches every DiceKey: the app adds each default that a
 DiceKey lacks. If the app ever stops adding a default to new DiceKeys, the parser still
 accepts its literal. So files and paper that carry it can still make the key. The app leaves
-out a catalog row whose recipe has no name and is not one of these. It does the same for any
-recipe that this version cannot read. The DiceKey's other keys load as usual.
+out a catalog row whose recipe has no name and isn't one of these. It does the same for any
+recipe that this version can't read. The DiceKey's other keys load as usual.
 
 A key with no name changes the encodings that use a name. The SSH public key line is
 `ssh-ed25519 <base64>`, with no comment and no trailing space. The private key's comment is
@@ -251,7 +251,7 @@ JSON is canonical. The parser accepts nothing else. A default has exactly one to
 literal. The format grows by adding. A new kind, a new type, a new algorithm for a kind, a
 new list or a new default leaves every existing string alone. A new field must never be
 added to an existing kind with a default that changes its text. To replace a key, give it a
-new name (`github 2`). So a default key cannot be replaced. There is no other version
+new name (`github 2`). So a default key can't be replaced. There is no other version
 counter.
 
 If a test below fails, a derived byte changed. Fix the code. Never change the fixture.
@@ -269,7 +269,7 @@ If a test below fails, a derived byte changed. Fix the code. Never change the fi
 - **Every key is independent.** `info` differs for every (type, recipe), so the outputs are
   unrelated. A leaked SSH key reveals nothing about the same name's WireGuard key, about
   another name's key, or about the DiceKey. No type string is a prefix of another, and every
-  recipe starts with `{`. So `type || recipe` reads only one way, and the id's `info` cannot
+  recipe starts with `{`. So `type || recipe` reads only one way, and the id's `info` can't
   equal the `info` of any key.
 - **Nothing can be reversed.** No output reveals the seed. You can store and share the id
   and the public keys.
@@ -302,7 +302,7 @@ If a test below fails, a derived byte changed. Fix the code. Never change the fi
   - `ssh-keygen`, `wg` and `age-keygen` 1.3 read every key back.
   - `age` encrypts to every age recipient, and the identity decrypts it.
   - The BIP39 reference decodes every phrase.
-- `KeyRecipeTests` check the name rules, JCS escaping and ordering, text that is not a
+- `KeyRecipeTests` check the name rules, JCS escaping and ordering, text that isn't a
   canonical recipe, and the default literals byte for byte. They also check that the parser
   refuses any other text that has no name.
 - `PassphraseListTests` and `PasswordFormatterTests` check the lists' digests and literal

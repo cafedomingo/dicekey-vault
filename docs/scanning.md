@@ -52,7 +52,7 @@ The scanner reads the bars, and the bars carry everything:
   face, a misread needs at least four wrong dots across the two lines, in the right places.
   Every face has another face exactly four dots away. The four dots split between the
   underline and the overline as 1 and 3, 2 and 2, or 3 and 1. This protects against errors
-  that strike the lines independently. It does not protect against one cause that strikes
+  that strike the lines independently. It doesn't protect against one cause that strikes
   both lines. For example, a cover or the frame's edge over the same end of both bars makes
   the same dots of both bars wrong. Step 4 keeps such lines from agreeing on their own.
 
@@ -111,13 +111,13 @@ The scanner fits each region of at least 50 pixels with its smallest enclosing r
 undoverline's proportions: 0.177 as thick as it is long, within a factor of 1.5 either way.
 The levels are independent, so they run in parallel.
 
-Most regions are not bars (paper texture, the box, letters, the scene). Two facts about a
+Most regions aren't bars (paper texture, the box, letters, the scene). Two facts about a
 key thin them out:
 
 - **All 50 bars are the same size.** The scanner sorts the areas and finds the tightest run
   of 35. Only candidates with an area from 0.75 to 1/0.75 times the middle area of that run
   stay. A tight run of much larger rectangles wins over a tight run of tiny ones, so specks
-  of equal size cannot outvote the bars.
+  of equal size can't outvote the bars.
 - **A bar is found at several thresholds.** Of overlapping candidates (the center of one is
   inside the other), the scanner keeps the one with the area closest to that middle area.
 
@@ -127,8 +127,8 @@ The scanner reads the dots along the line through the middle of the rectangle. S
 finds the two ends of that line. A rectangle found at one threshold can take in a little of
 what the bar touches, or miss a blurred end. So the scanner puts each end where the
 brightness drops most steeply into the bar. It searches within 3% of the bar's length either
-side of the rectangle's end. The steepest edge stays in place where a fixed brightness does
-not. A metallic sheen on the ink, or a shadow on the die just past the bar, moves the place
+side of the rectangle's end. The steepest edge stays in place where a fixed brightness
+doesn't. A metallic sheen on the ink, or a shadow on the die just past the bar, moves the place
 where a threshold is crossed. It moves the place by several pixels. That is enough to slide
 the dots onto their edges.
 
@@ -137,8 +137,8 @@ around its center (fewer when the dots are small). The scanner splits the dots i
 light at the brightness that leaves the two groups tightest. Each side has at least four
 dots (every code has 4 to 7 light dots). The split must be clear. The scanner measures the
 gap between the lightest dark dot and the darkest light dot. The gap must be at least a
-fifth of the distance between the two groups' mean brightness. If it is not, the scanner
-does not read the line. Dots that barely split could just as well split in another place,
+fifth of the distance between the two groups' mean brightness. If it isn't, the scanner
+doesn't read the line. Dots that barely split could just as well split in another place,
 and that gives another code. In a frame saved from the app, motion blur along the bars made
 both bars of one die read the same wrong face. This rule refuses those two bars. It also
 refuses the one face of the corpus video that the scanner otherwise read wrong. The rule
@@ -160,7 +160,7 @@ the grid puts it.
 - **Step and direction.** For each face middle, the scanner finds the distance to the
   nearest face middle that is more than 0.8 of a face away. That face middle is on another
   die. The step from die to die is the median of these distances. A step shorter than a face
-  cannot be dice side by side. Rows run in the direction that the lines share. The scanner
+  can't be dice side by side. Rows run in the direction that the lines share. The scanner
   multiplies the angles of the lines by four, so that the four turns of a face become one
   direction, and averages them. The mean divided by four lies within 45 degrees of the
   frame's x axis. So row 0 is the top of the key as the camera sees it.
@@ -201,7 +201,7 @@ the grid puts it.
   holds says where the other line of its face is. For a slot that holds neither line, the
   scanner tries bars on all four sides of the middle of the slot. The scanner places these
   bars in columns and rows, where every face is the same square however perspective shows
-  it. Only then does it map the bars into the frame, so perspective cannot stretch them. For
+  it. Only then does it map the bars into the frame, so perspective can't stretch them. For
   a slot that holds no line, the side of the face is the median length of the lines read,
   measured in columns and rows. The scanner reads a bar this way only if both its ends are
   in the frame. Past the frame's edge, a dot samples as dark, so a bar that the edge cuts
@@ -252,7 +252,7 @@ the grid puts it.
   - **The text.** The text is an independent vote where the cause leaves the text alone. A
     band across the bars misses the text. But the frame's edge cuts the text together with
     the bars. A die cut in half read K3 as K1 on its bar and its text alike. This is why the
-    scanner does not read bars that the edge cuts at the grid.
+    scanner doesn't read bars that the edge cuts at the grid.
   - **The cost.** Compared with trusting such lines, the rule reads 16 fewer faces from the
     `other/` photos over the four sizes. It reads 141 fewer from the saved frames and 4
     fewer from the well-framed photos. The rule first covered slots with both lines read at
@@ -262,7 +262,7 @@ the grid puts it.
 - **Rotation.** Each face's turn is its reading direction relative to the grid's rows at its
   slot, in quarter turns.
 
-**Why each gate is there.** Dice that are not a key can line up too. So the grid has to show
+**Why each gate is there.** Dice that aren't a key can line up too. So the grid has to show
 that it is the key's before the scanner reads any slot.
 
 - **Exactly five columns and rows:** the slots are the key's 25. If a whole column or row is
@@ -319,7 +319,7 @@ for error in its center. The face with the highest correlation is the text's bes
 
 A face settled by text then counts like any other in step 6.
 
-**Why each check is there.** The text match alone is not safe. Over all four sizes, the
+**Why each check is there.** The text match alone isn't safe. Over all four sizes, the
 corpus has 3,630 dice whose two lines were found and agree. For these dice, the best match
 was the right face every time, but only at the die's true orientation and size. In a test,
 the scanner read each die 10 times off its true orientation or size. The readings were a
@@ -335,7 +335,7 @@ Another test shifted the center that the scanner samples the text at. The shift 
 quarter of the step between dice (0.41 of a face at the median). A line's face middle can
 lie at most this far from its slot's middle and still go to that slot. So the shift is a
 conservative bound on the error in the center. The center is the middle of the die's own
-lines, which slot placement does not move. A die's two lines agree on that middle within 0.1
+lines, which slot placement doesn't move. A die's two lines agree on that middle within 0.1
 of a face in 99 cases of 100. With the shifted center, a wrong face passed the score and the
 lead 2 times in 29,040 (8 shifts of each die). Once, a wrong face also passed the
 quarter-turn lead. Now a misread needs two things. A misread line must name exactly the face
@@ -354,7 +354,7 @@ with the new frame on the most faces and disagrees on none. If every turn disagr
 somewhere, the camera is on another key, and the scanner starts over. The scanner needs five
 faces in common to call it the same key, because two keys can share a face or two by chance.
 With fewer, the larger set of faces stands: the known faces, or the faces of the new frame.
-So one key is not mixed into another on a coincidence. Successive frames of a key in view
+So one key isn't mixed into another on a coincidence. Successive frames of a key in view
 read most of its faces, so they share far more than five. A frame that reads nothing changes
 nothing.
 
@@ -395,8 +395,8 @@ owner's (one key is the one printed in the DiceKeys booklet). It also runs scene
 key. The standard for a photo depends on how the photographer took it, not on who took it:
 
 - **A well-framed key must read** (the photos in `well-framed/`). The test uses each photo
-  at the app's scale, with the shorter side scaled to 1,080 pixels. The test does not crop
-  the photos, because the photographers did not frame them through the app's square. The
+  at the app's scale, with the shorter side scaled to 1,080 pixels. The test doesn't crop
+  the photos, because the photographers didn't frame them through the app's square. The
   scanner must read at least 20 faces from one frame of each such photo. It must do so in
   two cases: filling the frame, and at three quarters of that size. The second case is a key
   held back to fit the scanning target. The scanning target is a window over the middle
@@ -418,7 +418,7 @@ key. The standard for a photo depends on how the photographer took it, not on wh
 The tests check every photo for misreads at full size, at the app's scale and three quarters
 of it. They also check each photo cropped to the centered square exactly as the app scans
 it. The scanner never read a face wrong in any of them. The photos far outside what the
-scanning overlay asks for are in the corpus to prove this. The scanner does not have to read
+scanning overlay asks for are in the corpus to prove this. The scanner doesn't have to read
 them.
 
 ## Against read-dicekey
@@ -488,17 +488,17 @@ By whose photo it is, faces right, this scanner / read-dicekey:
 - **No key:** neither scanner reads a face from any of the nine `nokey-` photos at any size.
   Neither fails on `CausedCrashOn2020-09-18`, read-dicekey's crash-regression input. This
   scanner reads 20 faces there. Their letters and digits match the printed key by eye. The
-  photo names no key, so the tests do not score them. read-dicekey reads none.
+  photo names no key, so the tests don't score them. read-dicekey reads none.
 - **Video,** 95 frames of 360-pixel luma squares: read-dicekey fits its grid in frame 0 only
   (18 faces right, none wrong) and never finishes. After every other frame, its read is
-  empty, because it clears the read whenever a frame does not fit. This scanner merges the
+  empty, because it clears the read whenever a frame doesn't fit. This scanner merges the
   frames. It knows all 25 faces by the end, with no wrong face in any frame. When it reads
   one frame at a time, it reads faces in 79 frames, and it reads at most 21 faces in one
   frame.
 - **Time per frame,** median, scanning only: this scanner takes 10, 6, 4 and 4 ms at the
   four sizes. read-dicekey takes 58, 24, 21 and 15 ms.
 
-What the numbers do not say:
+What the numbers don't say:
 
 - **The tuning used these photos,** which are the test suite of this scanner. read-dicekey's
   own tests use 23 of them. On the 19 that are well-framed, the two are level. Several of
@@ -515,7 +515,7 @@ What the numbers do not say:
   read-dicekey runs until it finishes. It forgets the key on any frame without a grid. This
   scanner merges frames, and it keeps what it knows through such a frame. The corpus tests
   state that one frame per photo is stricter than the app.
-- **The times are not alike.** This scanner traces its threshold levels in parallel
+- **The times aren't alike.** This scanner traces its threshold levels in parallel
   (`DispatchQueue.concurrentPerform` in `Bars.swift`). The comparison timed it inside
   `swift test -c release`. read-dicekey's levels run in series (OpenCV may parallelize
   single filters). The comparison built read-dicekey with `-O3` and timed it warm, with
@@ -546,7 +546,7 @@ geometry they work with is `FaceDimensionsFractional` in `DiceKeySpecification`.
 | `Tuning.Grid.minimumShareOnKey` | 60% of the frame's lines | Scattered or jumbled dice put 31 to 41% of their lines on the best grid. A key puts at least 69% |
 | `Tuning.Grid.minimumSlotsOnEachEdge` | 2 | A die past the key's edge fills one slot. Without this minimum, one stray line there pinned the grid of a saved frame a column off |
 | `Tuning.Grid.maximumFaceSideDeviation` | half the median length of the lines in the key's slots, in columns and rows, either way | A grid stretched by a steep tilt measured 0.80 off. Grids that fit measured at most 0.22 over the corpus and 0.40 over the saved frames. It costs no face |
-| `Tuning.Grid.smallestPivot` | 1e-9 | The fit is in columns and rows, which are small numbers. Points in one line cannot fix a grid, and they leave a pivot of rounding error |
+| `Tuning.Grid.smallestPivot` | 1e-9 | The fit is in columns and rows, which are small numbers. Points in one line can't fix a grid, and they leave a pivot of rounding error |
 | `Tuning.Merge.minimumFacesInCommon` | 5 | Too many to match by chance. Frames of a key in view share far more |
 | `MinNumberOfBlackDotsInUndoverline`, `MinNumberOfWhiteDotsInUndoverline` (`DiceKeySpecification`) | 4 and 4 | Every code has at least 4 of each |
 | `Tuning.Lines.minimumDotGap` | a fifth of the distance between the dark and light means | Drops 1.6% of the lines that read right and 28% of those that read wrong |
@@ -646,12 +646,12 @@ Tests measured three ways of finding the grid. The scanner keeps none of them:
   the key and lost a well-framed photo. So the refit uses a window of one column or row
   around the lines the flat grid kept.
 
-The project considered OpenCV, AprilTag, zxing-cpp and a Core ML detector, but did not try
+The project considered OpenCV, AprilTag, zxing-cpp and a Core ML detector, but didn't try
 them:
 
 - OpenCV is a large dependency for what steps 2 and 4 do in about 730 lines.
 - The decoders of the others are for their own tags and symbologies.
-- A trained model needs a pipeline to maintain. It does not remove the need for the bars.
+- A trained model needs a pipeline to maintain. It doesn't remove the need for the bars.
 
 The pattern: Vision's requests are built for a few salient objects per image or for natural
 text. Apple ships no fast way to find many small blobs. The task is to find 50 identical

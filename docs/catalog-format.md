@@ -8,14 +8,14 @@ later version of the app, and so must exported files. There are three forms:
 - **The link:** `dicekeyvault://import?catalog=<payload>`, on the list card's QR code.
   It is version 2.
 - **The recovery code:** `DKVR:<payload>`, on the recovery sheet. It is version 2. It is
-  never a link, so the faces do not pass through iOS link handling.
+  never a link, so the faces don't pass through iOS link handling.
 
 The recovery prefix carries no version. So the app still recognizes a later version's code
 as this app's and asks for an update.
 
 A version writes a file or paper only when it can write every key in it. A synced catalog can
 hold a key that a newer version made on another device. One example is a key of a kind that
-this version does not know. Another is a key with a field that this version does not know.
+this version doesn't know. Another is a key with a field that this version doesn't know.
 While the catalog holds such a key, Export asks for an update instead of leaving the key
 out. The list card and the recovery sheet of that key's DiceKey ask for an update in the
 same way.
@@ -38,13 +38,13 @@ The values:
 
 - `id` and a key's `diceKey`: the DiceKey's id as `derivation.md` defines it.
 - A key's recipe fields: as `derivation.md` defines them. A default key's recipe fields are
-  those of its literal recipe: `kind` alone. The JSON around them does not need to be
+  those of its literal recipe: `kind` alone. The JSON around them doesn't need to be
   canonical. The app rebuilds the canonical text of the recipe from the fields.
 - `publicKeys`: each algorithm's public key, by its type (`derivation.md` lists a kind's
   types). It is for reading in the file. An app never imports it. A file could carry anyone's
   key, so a public key only ever comes from deriving it here. A key with no public half,
-  which is a passphrase or a wallet, has none. A key also has none while the catalog does not
-  yet record its public keys. An app counts a key whose `publicKeys` is not a map of text as
+  which is a passphrase or a wallet, has none. A key also has none while the catalog doesn't
+  yet record its public keys. An app counts a key whose `publicKeys` isn't a map of text as
   unreadable.
 - `name` of a DiceKey: as `derivation.md` normalizes a name. The app replaces a name that
   fails those rules with the DiceKey's default name.
@@ -67,12 +67,12 @@ default keys come first:
 
 `<payload>` is that JSON, compressed with raw DEFLATE (RFC 1951) and written as base64url,
 unpadded (RFC 4648 section 5). The decoder reads any key order and any valid DEFLATE stream.
-Text that does not decode, inflate or parse is "not a catalog". JSON that inflates past
+Text that doesn't decode, inflate or parse is "not a catalog". JSON that inflates past
 256 KiB (`PaperPayload.maximumUnpackedBytes`) is also "not a catalog". The decoder stops
 there, since DEFLATE can inflate about 1,000 to 1 and a link can come from any source.
 
 These sizes come from measurements with CoreImage. The keys are SSH keys with 12-character
-names that do not compress, and the code also holds the two default keys.
+names that don't compress, and the code also holds the two default keys.
 
 - The list card's code is a QR code (level M), held to 119 modules wide. That is version 25
   plus the generator's one-module margin. It holds 55 named keys. 56 named keys need 123
@@ -86,15 +86,15 @@ Names that compress fit more keys. Longer names fit fewer keys. `PaperTests` pin
 
 ## Reading it
 
-An app reads each key on its own. It leaves out and counts any key that it cannot make
+An app reads each key on its own. It leaves out and counts any key that it can't make
 again. Such a key is one of these:
 
-- a key with a field, kind or value that the app does not know;
+- a key with a field, kind or value that the app doesn't know;
 - a key with a name that the rules of the app refuse;
 - in the file, a key with a `diceKey` that is neither in `diceKeys` nor already in the app.
 
 So a newer key never stops the app from reading the rest of the paper. When a key has a field
-that this version does not know, the app never reads the key as a different recipe. A
+that this version doesn't know, the app never reads the key as a different recipe. A
 recovery code's `id` must be the one that its `diceKey` text derives. The app refuses a file,
 link or code with more than 1,000 DiceKeys and keys together. It also refuses one whose `v`
 is newer than the app's, with "update the app".
@@ -102,7 +102,7 @@ is newer than the app's, with "update the app".
 Default keys (`derivation.md`) are in every form, as the fields of their literal recipes. So
 a later app can make each again from the file or paper alone. When the app imports or
 restores a default key that the catalog has, it adds nothing, as for any key. When the app
-imports or restores a DiceKey that it does not have, it records the DiceKey. Recording a
+imports or restores a DiceKey that it doesn't have, it records the DiceKey. Recording a
 DiceKey adds its default keys. The printed lists, and the counts that the app shows before an
 import or restore, leave out the defaults. They show the keys that the person made.
 
@@ -114,5 +114,5 @@ link, raw DEFLATE, base64url, JSON with a top-level `v`). So an older app can sa
 `Tests/DiceKeyVaultTests/Fixtures` holds the file as v1 (`catalog-v1.json`) and the link and
 recovery code as v2 (`catalog-link-v2.txt`, `recovery-v2.txt`). Never regenerate them. A
 failing fixture test means that the change breaks paper or files that exist already. The
-tests pin what the paper fixtures decode to. They do not pin the encoder's bytes, since
+tests pin what the paper fixtures decode to. They don't pin the encoder's bytes, since
 DEFLATE output may differ between OS versions.

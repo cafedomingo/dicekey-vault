@@ -2,9 +2,9 @@
 
 DiceKey Vault regenerates a few rarely used keys (SSH, WireGuard, age, passphrases and BIP39 wallet phrases) from a [DiceKey](https://dicekeys.com). It stores none of them. Scan or type the 25 dice, and the app derives the same keys every time.
 
-It is not a password manager. For daily use, a box of dice could never be better than a password manager. A DiceKey is an offline root secret. It suits the few keys that you rarely use and that are costly to lose. You regenerate these keys in the app, and you never use them there.
+It isn't a password manager. For daily use, a box of dice could never be better than a password manager. A DiceKey is an offline root secret. It suits the few keys that you rarely use and that are costly to lose. You regenerate these keys in the app, and you never use them there.
 
-It reads DiceKeys. DiceKeys, LLC makes them. It is not their app. It began as a fork of [dicekeys/dicekeys-app-ios](https://github.com/dicekeys/dicekeys-app-ios).
+It reads DiceKeys. DiceKeys, LLC makes them. It isn't their app. It began as a fork of [dicekeys/dicekeys-app-ios](https://github.com/dicekeys/dicekeys-app-ios).
 
 ## Documentation
 
@@ -49,7 +49,7 @@ Key derivation and the DiceKey scanner are pure Swift, in the local packages
 
 ## Testing the app
 
-You need a DiceKey, a box of 25 dice, to scan with the camera. If you do not have one, do
+You need a DiceKey, a box of 25 dice, to scan with the camera. If you don't have one, do
 these steps:
 
 1. Go to https://dicekeys.app.

@@ -140,10 +140,10 @@ belongs to DiceKeys, LLC, and identifiers are globally unique.
    instead.
 5. From Xcode, run the app on My Mac (Mac Catalyst) once. This registers the Mac.
 
-The project does not offer Designed for iPad. When the app ran that way, macOS:
+The project doesn't offer Designed for iPad. When the app ran that way, macOS:
 
 - reported every camera as upright at 0 degrees, though each camera needed its own turn
-- did not list a USB webcam anywhere
+- didn't list a USB webcam anywhere
 - zoomed a Continuity Camera too far
 
 ## Getting a build onto a device
@@ -153,7 +153,7 @@ versions at upload time, so nothing in the repository needs a new version number
 marketing version is the build date (`2026.9.23`). The build number is a minute-resolution
 timestamp.
 
-The script needs a **paid** Apple Developer Program membership. A free Personal Team cannot
+The script needs a **paid** Apple Developer Program membership. A free Personal Team can't
 upload to App Store Connect at all. It can only install over a cable, or over Wi-Fi after
 you pair the phone once in Xcode. Its builds expire after seven days.
 

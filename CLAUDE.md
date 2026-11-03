@@ -10,15 +10,14 @@ Docs (`docs/`, `README.md`) and code comments follow three rules from ASD-STE100
 
 ## Documentation
 
-Docs also follow the [Google developer documentation style guide](https://developers.google.com/style),
-except that they use no contractions. App strings follow the Content rules in `docs/design.md`
-instead.
+Docs also follow the [Google developer documentation style guide](https://developers.google.com/style).
+App strings follow the Content rules in `docs/design.md` instead.
 
 ## Code comments
 
-- Comment only what the code cannot say: a quirk, an ordering constraint, or a reason that is not
+- Comment only what the code can't say: a quirk, an ordering constraint, or a reason that isn't
   obvious. Never restate the code or repeat a name or signature. Most declarations need no comment.
 - In Swift, put a comment in the declaration's doc comment (`///`), not as a `//` line inside a
-  body. Tool directives such as `// swiftlint:disable:next` are not comments.
+  body. Tool directives such as `// swiftlint:disable:next` aren't comments.
 - Start a doc comment with a summary fragment, as the
   [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/) ask.

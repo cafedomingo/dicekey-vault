@@ -43,7 +43,7 @@ app and the user keep, and where.
 The keychain requires Face ID, Touch ID or the passcode to read the copy back, and enforces
 this itself. The copy is never synced to iCloud Keychain. It is never in a backup that
 another device can restore. It is unreadable while the device is locked. Forget deletes it
-before it does anything else, and stops if it cannot delete it.
+before it does anything else, and stops if it can't delete it.
 
 ## The catalog, and iCloud
 
@@ -71,8 +71,8 @@ SwiftData sends the catalog to the user's private CloudKit database,
   boxes.
 - The DiceKey itself never syncs. Each device scans it, or keeps its own keychain copy.
 
-What Apple could see is metadata. It could see that a key named "wallet" exists. It could
-not see the wallet. With Advanced Data Protection, the catalog is end-to-end encrypted. When
+What Apple could see is metadata. It could see that a key named "wallet" exists. It
+couldn't see the wallet. With Advanced Data Protection, the catalog is end-to-end encrypted. When
 you turn sync off, syncing stops, but the iCloud copy stays. Delete it in the device's
 iCloud storage settings.
 
@@ -82,9 +82,9 @@ card's QR code restores the DiceKey's list. Both hold the same non-secret fields
 import, the app only adds what is missing.
 
 A change to the switch applies at the next launch. The store opens once for each launch,
-because two CloudKit mirrors of one store file are not supported. If the synced store will
-not open, the app opens the same store without sync, and Settings says why. The app does
-this so that it does not fail at every launch. Changes from other devices can arrive at any
+because two CloudKit mirrors of one store file aren't supported. If the synced store
+won't open, the app opens the same store without sync, and Settings says why. The app does
+this so that it doesn't fail at every launch. Changes from other devices can arrive at any
 time after the device's first unlock.
 
 When two devices each scan a DiceKey before they sync, each device makes a record. One
@@ -108,13 +108,13 @@ choice deliberate:
 - The app asks for Face ID or the passcode first.
 - The preview stays concealed until Show. The app conceals it again on background, capture
   or a screenshot.
-- You cannot print or save the sheet while the screen is captured.
+- You can't print or save the sheet while the screen is captured.
 
 Print goes straight to AirPrint and leaves no file. However, the system's print dialog can
 still share the page as a PDF. Save as PDF warns first. The preview on screen is an image of
-the page, so you cannot select or copy its text. The code is text with its own prefix, not a
+the page, so you can't select or copy its text. The code is text with its own prefix, not a
 link. So iOS never handles the faces as a link. The code is an Aztec code, not a QR code, so
-the Camera app does not offer to search its text. When you restore, the app asks first. In
+the Camera app doesn't offer to search its text. When you restore, the app asks first. In
 the same alert, it asks whether to keep the DiceKey on this device.
 
 ## On screen
@@ -123,8 +123,8 @@ The app switcher shows a plain cover. The app shows the cover synchronously when
 goes to the background. UIKit takes the switcher's snapshot at that time (Apple's QA1838),
 so the snapshot that UIKit keeps holds no secret. The DiceKey's grid starts concealed. The
 app hides it again when the user leaves the app, and on capture or a screenshot. A
-screenshot cannot be blocked. The app hides any revealed secret afterwards, so that the next
-screenshot does not capture it. The app drops typed dice when it comes back at least the
+screenshot can't be blocked. The app hides any revealed secret afterwards, so that the next
+screenshot doesn't capture it. The app drops typed dice when it comes back at least the
 lock delay after it left. The app locks an unlocked DiceKey in the same case.
 
 Before the app shows the cover, the switcher can briefly show the screen as it was. Other
@@ -134,14 +134,14 @@ the scene goes to the background. Apple has no app API for more protection. The 
 applies `privacySensitive()` only for widgets on the Lock Screen and Always On displays. If
 the app put the content inside a secure text field's layer, that would block screenshots,
 recording and snapshots. But this method is undocumented, and it can break with any iOS
-release. So the app does not do it.
+release. So the app doesn't do it.
 
 ## Limits
 
-Swift cannot reliably zero memory, so a derived value may remain in memory until the app
+Swift can't reliably zero memory, so a derived value may remain in memory until the app
 reuses that memory. If someone compromises the device while a DiceKey is unlocked, they can
 read the DiceKey. The lock delay keeps that time short. A suspended app runs no timer. So a
 DiceKey that is unlocked when the app leaves stays in memory. It stays until the app comes
-back and locks it, or until iOS ends the app. You cannot rotate a key in place. A key is a
+back and locks it, or until iOS ends the app. You can't rotate a key in place. A key is a
 function of the DiceKey and its name. A default key has no name. So a new key needs a new
-name, and you cannot replace a default key.
+name, and you can't replace a default key.
