@@ -19,8 +19,6 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# The ./ form of the local action is kept (zizmor self-repository ignores below): actionlint 1.7.12
-# rejects the $/ form.
 jobs:
   # Nothing here needs Xcode, and an Ubuntu runner starts in seconds and costs a tenth.
   lint:
@@ -32,7 +30,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
+      - uses: $/.github/actions/build-tools
       - name: Install linters
         run: |
           python3 -m venv "$RUNNER_TEMP/lint"
@@ -69,7 +67,7 @@ jobs:
           PATH="$RUNNER_TEMP/age:$PATH" "$RUNNER_TEMP/kinds/bin/python" scripts/derive-kinds.py --tools
       # actionlint also runs shellcheck over each workflow `run:` block.
       - name: actionlint
-        run: actionlint
+        uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0
 
   # Both local packages with plain SwiftPM on the macOS host, in one job because each
   # takes about a minute and a macOS runner costs half that just to start. Derivation:
@@ -102,7 +100,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build iOS app (simulator)
@@ -136,7 +134,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Build Mac app (Catalyst)
@@ -164,7 +162,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/build-tools # zizmor: ignore[self-repository]
+      - uses: $/.github/actions/build-tools
       - name: Generate project
         run: swift run --package-path BuildTools xcodegen generate
       - name: Pick a simulator
