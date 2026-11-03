@@ -20,3 +20,6 @@ Config/*.local.xcconfig
 
 # App Store Connect API key settings for scripts/testflight.sh (see .env.example).
 .env
+
+# Specs and plans the superpowers plugin writes while planning.
+docs/superpowers/
