@@ -56,6 +56,9 @@ struct DiceKeyVaultApp: App {
                 .environment(saved)
                 .modelContainer(catalog)
                 .environment(\.catalogSyncFailure, syncFailure)
+                #if targetEnvironment(macCatalyst)
+                    .scrollEdgeEffectHidden(true, for: .top)
+                #endif
         }
     }
 }
