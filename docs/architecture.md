@@ -165,15 +165,14 @@ Before a first upload:
    upgraded membership usually has this agreement unsigned. Until you accept it, it blocks
    distribution profiles with a confusing permissions error.
 
-Before shipping, deploy the CloudKit schema to production. The development schema gains a
-field only once a development build syncs a record that has it. So when a release adds a
-field:
+Before shipping, deploy the CloudKit schema to production in the CloudKit console. The
+development schema gains a field only once a development build syncs a record that has it.
+So before you deploy for a release that adds a field:
 
 1. Run a build from Xcode with sync on.
 2. Use whatever stores the new field.
 3. Check that the record type has the field (`CD_KeyEntry` has `CD_publicKeys`, for
    instance).
-4. In the CloudKit console, deploy the schema to production.
 
 TestFlight builds expire after ninety days. No setting changes this. To get a new build, run
 the script again.

@@ -11,8 +11,8 @@ Docs (`docs/`, `README.md`) and code comments follow three rules from ASD-STE100
 ## Documentation
 
 Docs also follow the [Google developer documentation style guide](https://developers.google.com/style),
-except for two habits of their own: no serial comma, and no contractions. App strings follow the
-Content rules in `docs/design.md` instead.
+except that they use no contractions. App strings follow the Content rules in `docs/design.md`
+instead.
 
 ## Code comments
 

@@ -447,8 +447,8 @@ each photo, so it merges nothing. A face counts as read when its `isDefined()` s
 needs an orientation. It also needs a majority of two of underline, overline and its OCR for
 the letter, and the same for the digit. read-dicekey keeps the faces of a frame only when
 its grid fits five rows and columns of underline and overline pairs. Otherwise it reads
-nothing from the frame. OpenCV runs its arm64 code paths here. Other CPUs take other code paths, which
-may move a face or two.
+nothing from the frame. OpenCV runs its arm64 code paths here. Other CPUs take other code
+paths, which may move a face or two.
 
 Faces right/wrong:
 
