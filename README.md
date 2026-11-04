@@ -14,6 +14,7 @@ It reads DiceKeys. DiceKeys, LLC makes them. It isn't their app. It began as a f
 - [Catalog format](docs/catalog-format.md): the file, link and code that carry the catalog.
 - [Design](docs/design.md): the look, and the tokens behind it.
 - [Scanning](docs/scanning.md): how the scanner reads a DiceKey.
+- [Scanner measurements](docs/scanning-measurements.md): the measurements behind the scanner.
 - [Issues](https://github.com/cafedomingo/dicekey-vault/issues): what is left.
 
 ## Building

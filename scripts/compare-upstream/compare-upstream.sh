@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Reads the scanner's photo corpus and video with upstream dicekeys/read-dicekey (C++ on OpenCV) as
 # well as with this repo's scanner, scores both as ScannerCorpusTests scores, and prints Markdown
-# tables. docs/scanning.md, "Against read-dicekey", gives the method and the results.
+# tables. docs/scanning-measurements.md, "Against read-dicekey", gives the method and the results.
 #
 #   scripts/compare-upstream/compare-upstream.sh [work dir]
 #

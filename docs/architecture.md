@@ -7,6 +7,7 @@ Companion documents:
 - `catalog-format.md`: the catalog's file, link and code formats
 - `design.md`: the look
 - `scanning.md`: how the scanner reads a DiceKey
+- `scanning-measurements.md`: the measurements behind the scanner
 
 The repository's issues list what is left.
 
@@ -28,7 +29,7 @@ DiceKey Vault regenerates a few rarely used keys (SSH, WireGuard, age, passphras
 - **The keychain service** (`SavedDiceKeys`) can keep a DiceKey on this device, protected by user presence (Face ID, Touch ID or the passcode). It is never synced or restored elsewhere.
 - **The catalog** (SwiftData, `Model/Catalog.swift`: `DiceKeyRecord`, `KeyEntry`) holds only non-secret metadata. This is enough to derive each key again. `security.md` says what the catalog holds. `catalog-format.md` defines its fields, and defines how it travels as a file, a link and a code.
 - **`Derivation`**: `KeyRecipe` turns a kind and a name into canonical recipe JSON. It reads the JSON back only in that form. `DerivedKey` derives the keys of a recipe, one key for each of the kind's algorithms (`KeyKind.algorithms`). It also encodes each key. `scripts/derive-kinds.py`, an independent implementation, writes `Fixtures/kinds.json`.
-- **`ReadDiceKey`** is the scanner. `scripts/compare-upstream/compare-upstream.sh` also reads the photo corpus of `ReadDiceKey` with DiceKeys' own scanner, for the comparison in `scanning.md`.
+- **`ReadDiceKey`** is the scanner. `scripts/compare-upstream/compare-upstream.sh` also reads the photo corpus of `ReadDiceKey` with DiceKeys' own scanner, for the comparison in `scanning-measurements.md`.
 
 ## Where things live
 
