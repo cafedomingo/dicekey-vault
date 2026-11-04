@@ -18,9 +18,7 @@ It reads DiceKeys. DiceKeys, LLC makes them. It isn't their app. It began as a f
 
 ## Building
 
-You need the Xcode version named by `xcodeVersion` in `project.yml`.
-[XcodeGen](https://github.com/yonaskolb/XcodeGen) generates the project. `BuildTools/` pins
-XcodeGen, and the first use builds it (about a minute).
+You need the Xcode version named by `xcodeVersion` in `project.yml`. [XcodeGen](https://github.com/yonaskolb/XcodeGen) generates the project. `BuildTools/` pins XcodeGen, and the first use builds it (about a minute).
 
 1. Generate the Xcode project:
 
@@ -44,24 +42,18 @@ Before you commit, format the code:
 swift format format --in-place --recursive DiceKeyVault Packages Tests   # before committing
 ```
 
-Key derivation and the DiceKey scanner are pure Swift, in the local packages
-`Packages/Derivation` and `Packages/ReadDiceKey`.
+Key derivation and the DiceKey scanner are pure Swift, in the local packages `Packages/Derivation` and `Packages/ReadDiceKey`.
 
 ## Testing the app
 
-You need a DiceKey, a box of 25 dice, to scan with the camera. If you don't have one, do
-these steps:
+You need a DiceKey, a box of 25 dice, to scan with the camera. If you don't have one, do these steps:
 
 1. Go to https://dicekeys.app.
 2. Generate a random DiceKey: a throwaway one, never your real DiceKey.
 3. Scan the picture of its 25 dice from another screen.
 
-`scripts/testflight.sh` builds the app and uploads it to TestFlight. See the architecture
-document.
+`scripts/testflight.sh` builds the app and uploads it to TestFlight. See the architecture document.
 
 ## License
 
-Original work here is MIT-licensed (see [LICENSE](LICENSE)), but parts derive from DiceKeys,
-LLC's original code, which has no open-source license yet, so this app is for personal use
-and TestFlight only until DiceKeys, LLC picks one. Every third-party component and its terms
-is in [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES).
+Original work here is MIT-licensed (see [LICENSE](LICENSE)), but parts derive from DiceKeys, LLC's original code, which has no open-source license yet, so this app is for personal use and TestFlight only until DiceKeys, LLC picks one. Every third-party component and its terms is in [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES).
