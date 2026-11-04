@@ -44,7 +44,8 @@ The icon is a layered Icon Composer icon: a deep petrol ground, with the DiceKey
 - The primary action is `accent` with an `on-accent` label. This is the glass-prominent tint, in both themes. Allow one primary action per screen.
 - `danger` means only destruction, and the recovery sheet's warning that the page is the DiceKey. The app tells you about a misread die in words under the camera, in `ink-muted`. Success has no color of its own. A passphrase's strength bar is the one graded scale (`strength-weak` to `strength-strong`).
 - The camera image sits on `camera` black in every theme. `camera-dim` covers everything outside a window in the middle of the image, where the DiceKey goes. It shows only while the camera reads no die.
-- Draw a die as the real one looks: a light `die-face` with an `on-die` glyph, in the dark `die-box`. In dark, all three invert: dark dice with light glyphs in a light box. So 25 bright faces don't glare. A dark die has a `die-edge` rim. The rim gives it the outline that its shadow gives a light die, where it sits outside the box.
+- Draw a die as the real one looks: a light `die-face` with an `on-die` glyph, in the dark `die-box`. In dark, all three dim, and the dice stay lighter than the box: gray dice with light glyphs in a near-black petrol box. So 25 faces don't glare. In dark, a `die-edge` outline sets the box off from `bg-raised`. A dark die has a `die-edge` rim only where it sits outside the box. The rim gives it the outline that its shadow gives a light die. In the box, a rim on every die blurs the grid.
+- Put a `die-dot` at each crossing where four dice meet, in both themes. Without the dot, the eye fills every crossing that it isn't looking at with a gray haze (the Hermann grid illusion). Rounder corners, a softer box and dice set askew don't stop the haze. A dot that is just big enough to see does.
 
 ## Type
 
@@ -63,7 +64,7 @@ The icon is a layered Icon Composer icon: a deep petrol ground, with the DiceKey
 
 ## The DiceKey on screen
 
-The app draws a DiceKey only as a 5×5 grid of dice in reading order, never as an illustration of the box in perspective. Each die shows its letter and digit in `die` type, rotated to the orientation of the die. A short bar under the glyph, like the line printed on the real die, makes upright, right, down and left clear at a glance. The letters are A–Z without Q, and the digits are 1–6. The dice sit in a `die-box` ground, as in the real box. The grid starts concealed, with every die a blank `die-face`, until you tap Show dice. While you type, the app marks the selected die with an `accent` outline.
+The app draws a DiceKey only as a 5×5 grid of dice in reading order, never as an illustration of the box in perspective. Each die shows its letter and digit in `die` type, rotated to the orientation of the die. A short bar under the glyph, like the line printed on the real die, makes upright, right, down and left clear at a glance. The letters are A–Z without Q, and the digits are 1–6. The dice sit in a `die-box` ground, as in the real box, with a `die-dot` where four dice meet. The grid starts concealed, with every die a blank `die-face`, until you tap Show dice. While you type, the app marks the selected die with an `accent` outline.
 
 ## Motion
 
@@ -89,11 +90,12 @@ In code, a token keeps its name in lower camel case. The color sets in `DiceKeyV
 | `accent-ink` | `#135466` | `#86d0e0` | The app's tint: accent as text and marks, such as links, plain buttons, a kind's icon and the lock countdown. 7.5:1 or better on `bg` and `bg-raised` in both themes. |
 | `accent-soft` | `#d5e8ec` | `#133540` | Ground of a key's kind icon, under `accent-ink`. |
 | `danger` | `#b81d16` | `#ff7b6b` | Destructive actions and the recovery sheet's warning band. Always with a word or an icon. 5.5:1 or better on `bg` and `bg-raised` in both themes. |
-| `die-face` | `#fbfbf7` | `#1c1c1e` | A die's face, a concealed die, and the recovery sheet's concealed code. |
+| `die-face` | `#fbfbf7` | `#3a3a3c` | A die's face, a concealed die, and the recovery sheet's concealed code. |
 | `on-die` | `#121411` | `#e4e4e4` | A die's glyph and bar. |
-| `die-edge` | clear | `#636366` | The rim of a dark die: 3.2:1 on `bg`, 2.3:1 on `bg-raised`. |
+| `die-edge` | clear | `#636366` | The rim of a dark die outside the box, and the outline of the dark box: 3.2:1 on `bg`, 2.3:1 on `bg-raised`. |
 | `die-shadow` | `rgba(0, 0, 0, 0.25)` | `rgba(0, 0, 0, 0.25)` | A die's faint shadow. |
-| `die-box` | `#142b33` | `#9fb6bd` | The ground that the 25 dice sit in. It is the opposite of the dice in each theme: 8:1 against them, and 6.5:1 against `bg-raised` in dark. |
+| `die-box` | `#142b33` | `#0f181b` | The ground that the 25 dice sit in. It is darker than the dice in both themes: 14.2:1 against them in light, and 1.6:1 in dark, where its `die-edge` outline sets it off from `bg-raised`. |
+| `die-dot` | `#889395` | `#25292c` | The dot where four dice meet, halfway from `die-box` to `die-face`. |
 | `camera` | `#000000` | `#000000` | Behind the live camera image, in every theme. |
 | `camera-dim` | `rgba(0, 0, 0, 0.75)` | `rgba(0, 0, 0, 0.75)` | Darkens the camera image outside the window in its middle, while the camera reads no die. |
 | `strength-weak` | system red | system red | A passphrase's strength bar, weakest to strongest. |

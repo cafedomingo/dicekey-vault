@@ -41,14 +41,19 @@ struct DieView: View {
     let face: PartialFace
     var concealed = false
     var size = Size.grid
+    /// Whether the die sits in the box, which draws it without a rim: the box sets it off, and a rim
+    /// on every die blurs the grid.
+    var isInBox = false
 
     var body: some View {
         RoundedRectangle(cornerRadius: size * Ratio.corner)
             .fill(Color.dieFace)
             .shadow(color: .dieShadow, radius: Self.shadowRadius, y: Self.shadowOffset)
             .overlay {
-                RoundedRectangle(cornerRadius: size * Ratio.corner).strokeBorder(
-                    Color.dieEdge, lineWidth: Self.edgeWidth)
+                if !isInBox {
+                    RoundedRectangle(cornerRadius: size * Ratio.corner).strokeBorder(
+                        Color.dieEdge, lineWidth: Self.edgeWidth)
+                }
             }
             .frame(width: size, height: size)
             .overlay {
@@ -74,6 +79,10 @@ struct DiceKeyGrid: View {
     private static let selectionLineWidth: CGFloat = 3
     private static let boxPaddingRatio: CGFloat = 0.3
     private static let boxCornerRatio: CGFloat = 0.4
+    /// The box's `die-edge` outline, clear in light, where the box stands out on its own.
+    private static let boxEdgeWidth: CGFloat = 1
+    /// About 2 pt across at the grid's usual die size: just visible, and enough.
+    private static let crossingDotRatio: CGFloat = 0.045
 
     let faces: [PartialFace]
     var concealed = false
@@ -103,14 +112,38 @@ struct DiceKeyGrid: View {
             }
         }
         .padding(dieSize * Self.boxPaddingRatio)
-        .background(Color.dieBox, in: .rect(cornerRadius: dieSize * Self.boxCornerRatio))
+        .background {
+            let box = RoundedRectangle(cornerRadius: dieSize * Self.boxCornerRatio)
+            box.fill(Color.dieBox)
+            crossingDots(spacing: spacing)
+            box.strokeBorder(Color.dieEdge, lineWidth: Self.boxEdgeWidth)
+        }
         .accessibilityElement(children: concealed ? .ignore : .contain)
         .accessibilityLabel(concealed ? "DiceKey, concealed" : "DiceKey")
     }
 
+    /// A dot where four dice meet. Without it, the eye fills each crossing that it isn't looking at
+    /// with a gray haze (the Hermann grid illusion). The dot gives the crossing something to show.
+    private func crossingDots(spacing: CGFloat) -> some View {
+        Canvas { context, _ in
+            let diameter = dieSize * Self.crossingDotRatio
+            let step = dieSize + spacing
+            let first = dieSize * Self.boxPaddingRatio + dieSize + spacing / 2
+            for row in 0..<(Self.side - 1) {
+                for column in 0..<(Self.side - 1) {
+                    let center = CGPoint(x: first + CGFloat(column) * step, y: first + CGFloat(row) * step)
+                    let dot = CGRect(
+                        x: center.x - diameter / 2, y: center.y - diameter / 2, width: diameter, height: diameter)
+                    context.fill(Path(ellipseIn: dot), with: .color(.dieDot))
+                }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
     @ViewBuilder
     private func die(at index: Int) -> some View {
-        let die = DieView(face: faces[index], concealed: concealed, size: dieSize)
+        let die = DieView(face: faces[index], concealed: concealed, size: dieSize, isInBox: true)
             .overlay {
                 if index == selectedIndex {
                     RoundedRectangle(cornerRadius: DieView.spacing(for: dieSize)).strokeBorder(
