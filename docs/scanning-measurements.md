@@ -1,19 +1,17 @@
 # Scanner measurements
 
-These are the measurements behind the scanner that `scanning.md` describes: how it compares with read-dicekey, the reasons and numbers behind its constants, and the approaches it tried and dropped.
+These are the measurements behind the scanner that `scanning.md` describes: how it compares with read-dicekey, the reasons and numbers behind its constants, and the approaches it tried and dropped. Besides the photo corpus, many of them use the saved frames. These are 1,051 frames from the app on a Mac, in four sessions. They're kept locally, not in the repository.
 
 ## Against read-dicekey
 
-`scripts/compare-upstream/compare-upstream.sh` reads the corpus with read-dicekey (commit 0440036, built on OpenCV 4.12.0, the version it pins) as well as with this scanner. It prints the tables below, and one row per photo and size. A rerun gives these faces exactly. Times move by a millisecond or so.
-
-Both scanners read the same gray bytes. `UpstreamCompareTests` writes them as PGMs, one frame per photo at the four sizes of the corpus tests:
+`scripts/compare-upstream/compare-upstream.sh` reads the corpus with read-dicekey (commit 0440036, built on OpenCV 4.12.0, the version it pins) as well as with this scanner. It prints tables, including the one below, and one row per photo and size. Both scanners read the same gray bytes. `UpstreamCompareTests` writes them as PGMs, one frame per photo at the four sizes of the corpus tests:
 
 - full size
 - the shorter side 1080, the app's scale
 - the centered 1080 square the app scans
 - the shorter side 810
 
-The corpus tests' rules score the reads. read-dicekey runs `DiceKeyImageProcessor::processImage`, its grayscale entry, with a fresh processor for each photo, so it merges nothing. A face counts as read when its `isDefined()` says so. That needs an orientation. It also needs a majority of two of underline, overline and its OCR for the letter, and the same for the digit. read-dicekey keeps the faces of a frame only when its grid fits five rows and columns of underline and overline pairs. Otherwise it reads nothing from the frame. OpenCV runs its arm64 code paths here. Other CPUs take other code paths, which may move a face or two.
+The corpus tests' rules score the reads. read-dicekey uses a fresh processor for each photo, so it merges nothing. A face counts as read when its `isDefined()` says so. read-dicekey reads nothing from a frame unless its grid fits five rows and columns of underline and overline pairs. OpenCV runs its arm64 code paths here. Other CPUs take other code paths, which may move a face or two.
 
 Faces right/wrong:
 
@@ -26,28 +24,17 @@ Faces right/wrong:
 | read-dicekey | 39/0 | 62/0 | 80/0 | 43/1 |
 | read-dicekey, keys it calls complete | 0 of 13 | 0 of 13 | 0 of 13 | 1 of 13 |
 
-By whose photo it is, faces right, this scanner / read-dicekey:
-
-|  | full size | shorter side 1080 | centered 1080 square | shorter side 810 |
-|---|---|---|---|---|
-| read-dicekey's own well-framed (19 photos, 475 faces) | 473 / 473 | 475 / 473 | 467 / 443 | 475 / 473 |
-| the owner's well-framed, added later (16 photos, 398 faces) | 365 / 305 | 391 / 287 | 343 / 258 | 387 / 311 |
-| read-dicekey's own `other/` (3 photos, 75 faces) | 64 / 19 | 65 / 42 | 66 / 42 | 67 / 43 |
-| the owner's `other/` (10 photos, 245 faces) | 65 / 20 | 62 / 20 | 62 / 38 | 63 / 0 |
-
-- **On read-dicekey's own well-framed photos the two are level.** They read the same at full size, and read-dicekey is two faces behind at each shorter-side size. On the centered square, read-dicekey reads 30 fewer faces than at its other sizes. Of these 30, 25 are from `S4tI3lZ2t…_well_lit`, and read-dicekey reads no face from that photo there. This scanner reads 21 faces from it there.
-- **The gaps are on the later photos and on read-dicekey's own `other/` ones.**
-- **Misreads:** this scanner has none at any size. read-dicekey has two, both at shorter side 810: `G5bS2rW5l…-glare` U4b read as A3l, and `Y6bS2rG4b…` N4b read as N3b. read-dicekey flags both as errors (`errorSize()` 10 and 255), and neither frame passes its complete-key check.
-- **No key:** neither scanner reads a face from any of the nine `nokey-` photos at any size. Neither fails on `CausedCrashOn2020-09-18`, read-dicekey's crash-regression input. This scanner reads 20 faces there. Their letters and digits match the printed key by eye. The photo names no key, so the tests don't score them.
-- **Video,** 95 frames of 360-pixel luma squares: read-dicekey fits its grid in frame 0 only (18 faces right, none wrong) and never finishes. After every other frame, its read is empty, because it clears the read whenever a frame doesn't fit. This scanner merges the frames. It knows all 25 faces by the end, with no wrong face in any frame. When it reads one frame at a time, it reads faces in 79 frames, and it reads at most 21 faces in one frame.
-- **Time per frame,** median, scanning only: this scanner takes 10, 6, 4 and 4 ms at the four sizes. read-dicekey takes 58, 24, 21 and 15 ms.
+- **On read-dicekey's own 19 well-framed photos, the two scanners are level.** They read the same at full size, and read-dicekey is two faces behind at each shorter-side size. On the centered square, read-dicekey reads 30 fewer faces than at its other sizes, 25 of them from `S4tI3lZ2t…_well_lit`.
+- **The gaps are on the owner's 16 later well-framed photos and on the `other/` photos.** At the app's scale, this scanner reads 391 of the owner's 398 later well-framed faces, and read-dicekey reads 287.
+- **Misreads:** this scanner has none at any size. read-dicekey has two, both at the shorter side 810, and it flags both as errors (`errorSize()` 10 and 255).
+- **No key:** neither scanner reads a face from any of the nine `nokey-` photos at any size.
+- **Video,** 95 frames of 360-pixel luma squares: read-dicekey fits its grid in frame 0 only and never finishes, because it clears its read whenever a frame doesn't fit. This scanner merges the frames. It knows all 25 faces by the end, with no wrong face in any frame.
+- **Time per frame,** median, scanning only: this scanner takes 10, 6, 4 and 4 ms at the four sizes, and read-dicekey takes 58, 24, 21 and 15 ms. The times aren't alike. This scanner traces its threshold levels in parallel, and its times come from `swift test -c release`. read-dicekey runs its levels in series, built with `-O3` and timed warm. Neither time includes decoding or resizing the photo.
 
 What the numbers don't say:
 
-- **The tuning used these photos,** which are the test suite of this scanner. Several of the owner's names record what this scanner read, with a check by eye where the picture is sharp (`Fixtures/images/README.md`). So if this scanner consistently misread a face, the score would count read-dicekey's correct read as wrong. Neither of read-dicekey's two misreads is on such a photo.
-- **"Read" is read-dicekey's own standard,** which counts faces that it flags (`errorSize()` above 0). Its apps show those faces to the user to confirm. When the count includes only the faces without a flag, read-dicekey reads 6 to 14 fewer per size from the well-framed photos, and none wrong.
-- **One frame is a strict test for both scanners,** since both are built for a camera loop. read-dicekey forgets the key on any frame without a grid. This scanner merges frames, and it keeps what it knows through such a frame.
-- **The times aren't alike.** This scanner traces its threshold levels in parallel (`DispatchQueue.concurrentPerform` in `Bars.swift`) and was timed inside `swift test -c release`. read-dicekey's levels run in series (OpenCV may parallelize single filters), and it was built with `-O3` and timed warm. The times leave out the time to decode a photo and to resize it.
+- **The tuning used these photos.** Several of the owner's photo names record what this scanner read, with a check by eye where the picture is sharp (`Fixtures/images/README.md`). So if this scanner consistently misread a face, the score would count read-dicekey's correct read as wrong. Neither of read-dicekey's two misreads is on such a photo.
+- **"Read" is read-dicekey's own standard,** which counts faces that it flags for the user to confirm. Without them, read-dicekey reads 6 to 14 fewer faces per size from the well-framed photos, and none wrong.
 
 ## Constants and where they come from
 
@@ -79,28 +66,24 @@ What the numbers don't say:
 
 ## Why it works this way: alternatives measured
 
-Apple's frameworks came first. The assumption was that they would do the job with less code. The first three rows were measured on the 23 photos that the corpus then held, at 1080 pixels on an M2:
+Apple's frameworks came first, on the assumption that they would do the job with less code. The first three rows were measured on the 23 photos that the corpus then held, at 1080 pixels on an M2.
 
 | Approach | Result | Why it lost |
 |---|---|---|
-| Vision `DetectRectanglesRequest` | 0 to 13 rectangles per frame. Even a clean synthetic image of 50 bars gives 8 to 12 at real sizes | Built for a few prominent quadrilaterals, and it caps its results per request. Tiling the frame into 36 requests found more rectangles but still read only 14 faces |
-| Vision `DetectContoursRequest` | Full reads on about half the photos. Times are mostly 34 to 270 ms, and 10 s on one | One global threshold, where uneven light needs many. Its cost grows faster than the contour count (at 512 pixels, 430 contours took 23 ms and 2,456 took 3.2 s). Dividing the image by its own blur first fixed much of the lighting but not the speed |
-| Vision `RecognizeTextRequest` as the reader | 20 to 49% of faces found in a full frame. Given each face's location, 85 to 91% read, with wrong but plausible reads | Built for lines of words, not isolated rotated pairs of characters. It has no error check, it needs a detector anyway, and the fast level only reads upright text |
-| Vision `DetectRectanglesRequest` and `DetectDocumentSegmentationRequest` for the key's box | Found the box accurately in at most 18 of 103 images, as they were or inverted |  |
-| Template OCR (read-dicekey), replaced by step 5 | As a third vote beside the two codes, it could only veto good reads, because the two codes were right whenever they agreed. As a tie-breaker where the codes disagreed, a port named the right face 14 times and a wrong one 3 times (photos at 1080) | Each time, it named a face that neither code named. Step 5 matches the whole face against faces drawn from the font, and only ever settles a face that a code names |
-| Canny edge level, dropped | 1 more face of 550 (on the corpus of the time) from the well-framed photos at the app's frame size | It cost 2.6 ms and about 120 MB per frame in Core Image, or 9 ms on the CPU |
+| Vision `DetectRectanglesRequest` | 0 to 13 rectangles per frame, where a key has 50 bars. Tiled into 36 requests, it still read only 14 faces | It's built for a few prominent quadrilaterals, and it caps its results per request |
+| Vision `DetectContoursRequest` | Full reads on about half the photos. Times are mostly 34 to 270 ms, and 10 s on one | One global threshold, where uneven light needs many. Its cost grows faster than the contour count |
+| Vision `RecognizeTextRequest` as the reader | 20 to 49% of faces found in a full frame. Given each face's location, 85 to 91% read, with wrong but plausible reads | Built for lines of words. It has no error check, and it needs a detector anyway |
+| Vision `DetectRectanglesRequest` and `DetectDocumentSegmentationRequest` for the key's box | Found the box accurately in at most 18 of 103 images |  |
+| Template OCR (read-dicekey), replaced by step 5 | As a third vote, it could only veto good reads, because the two codes were right whenever they agreed. As a tie-breaker, it named the right face 14 times and a wrong one 3 times | Each time, it named a face that neither code named. Step 5 only ever settles a face that a code names |
+| Canny edge level | 1 more face of 550 (on the corpus of the time) from the well-framed photos at the app's frame size | It cost 2.6 ms and about 120 MB per frame in Core Image, or 9 ms on the CPU |
 | Bar ends at a threshold crossing, replaced by the steepest edge (step 3) | 15 fewer faces from the well-framed photos over the four corpus sizes, and 85 fewer from the others | Uneven light along a bar moves where a threshold is crossed |
-| Pairing, and the grid through one face (read-dicekey), replaced by the lattice (step 4) | Pairing lost nothing over 1,051 frames saved from the app on a Mac (four sessions, kept locally, not in the repository): true pairs missed by at most 0.18 of a face. The grid through one face lost frames. On the saved frames the lattice reads 1,912 faces and pairing read 478. The key of one session was complete at frame 46 instead of 105. From one frame each, neither method read a face wrong | The grid through one face needed one face with a full row and column of paired faces. A key with its left column cut off by the frame lacks it, and so does a key fully in view with 19 paired faces but no complete column. The cost: a scan takes 2.8 ms on average over the photos and frames, against 2.2 ms |
-| A brightness gradient along the bar, for dots under sheen | 5 more faces from the well-framed photos over the four sizes and 56 more from the others, but it lost all 14 of the super-low-res photo at full size and all 15 of the blurry photo in the centered square | Its extra freedom misfits small or blurred dots that a flat split reads. Using it only where it fits much better than a flat split gave up the gains |
-| Each dot against the ink beside it, for dots under sheen | 63 fewer faces from the well-framed photos over the four sizes | Meant to cancel sheen, since the ink beside a dot carries the same sheen |
+| Pairing, and the grid through one face (read-dicekey), replaced by the lattice (step 4) | On the saved frames, the lattice reads 1,912 faces and pairing read 478. From one frame each, neither method read a face wrong | The grid through one face needs a face with a full row and column of paired faces. A key with a column cut off by the frame lacks one, and so can a key fully in view. The lattice takes 2.8 ms a scan, against 2.2 ms |
+| Reading bars that the frame's edge cuts, at the grid | 2 more faces from the `other/` photos over the four sizes and 3 more from the saved frames | It completed a synthetic key wrong |
+| Refusing every line with an end outside the frame, however the scanner found it | 72 fewer faces from the `other/` photos and 81 fewer from the saved frames |  |
+| A line read at the grid as a vote on its own | 16 more faces from the `other/` photos over the four sizes, 141 more from the saved frames and 4 more from the well-framed photos | Noise read a wrong underline at a blank place in 8 of 6,000 synthetic frames. One such frame completed a wrong key |
+| A brightness gradient along the bar, for dots under sheen | 5 more faces from the well-framed photos over the four sizes and 56 more from the others. It lost all 14 faces of the super-low-res photo at full size and all 15 of the blurry photo in the centered square | Its extra freedom misfits small or blurred dots. Using it only where it fit much better than a flat split gave up the gains |
+| Each dot against the ink beside it, for dots under sheen | 63 fewer faces from the well-framed photos over the four sizes |  |
 | Perspective grid fitted first | Misread on the dice of a sparse frame | Perspective now only refines a flat grid that at least 16 lines hold |
 | Gathering lines anywhere after the perspective refit | Caught dice five rows past the key and lost a well-framed photo | The refit uses a window of one column or row around the lines the flat grid kept |
 
-Corpus faces read, lattice against pairing (both counts are from before the external-camera frames of `D32T52S20…` joined the corpus):
-
-- Well-framed photos at the app's scale, three quarters of it, full size and the centered square: 794, 791, 766 and 737 against 795, 791, 769 and 717.
-- The others: 110, 113, 109 and 110 against 91, 94, 90 and 92.
-
-The project considered OpenCV, AprilTag, zxing-cpp and a Core ML detector, but didn't try them. OpenCV is a large dependency for what steps 2 and 4 do in about 730 lines. The decoders of the others are for their own tags and symbologies. A trained model needs a pipeline to maintain, and it doesn't remove the need for the bars.
-
-The pattern: Vision's requests are built for a few salient objects per image or for natural text. Apple ships no fast way to find many small blobs. The task is to find 50 identical small bars under uneven light and to decode their dots. This is a fiducial-marker problem, in the family of QR codes and AprilTags. Those detectors are hand-written for their markers too.
+The project considered OpenCV, AprilTag, zxing-cpp and a Core ML detector, but didn't try them. OpenCV is a large dependency for what steps 2 and 4 do in about 730 lines. The others decode their own tags and symbologies, and a trained model still needs the bars. Finding 50 identical small bars under uneven light is a fiducial-marker problem, like QR codes and AprilTags, and those detectors are hand-written for their markers too.

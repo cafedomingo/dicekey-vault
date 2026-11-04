@@ -177,21 +177,6 @@ If a test below fails, a derived byte changed. Fix the code. Never change the fi
 
 ## What the tests pin
 
-- **kinds.json**: `scripts/derive-kinds.py` writes it. The script shares nothing with the Swift code but the word lists. The file has these sections:
-  - `seeds`: the text as typed and its canonical seed (the script checks it against the seeds that the original DiceKeys C++ derived).
-  - `hkdf`: seed, type, recipe text, length and the raw output in hex.
-  - `diceKeyIds`: seed and id.
-  - `cases`: derivations across every kind and style. Each case has `seed`, `kind`, `input` (the name as typed, to exercise normalization), `name`, `style`, `recipe` and `algorithms`.
-    - `algorithms` has one entry per algorithm of the kind, in order. Each entry has its `type` and the `publicKey`, `fingerprint` and `secret` that its tool reads.
-    - A passphrase or a wallet has no `publicKey` or `fingerprint`. Age's post-quantum key has no `fingerprint`.
-  - `defaults`: each default for each seed, with `seed`, `kind`, `recipe` (its literal) and `algorithms` as above.
+`scripts/derive-kinds.py` derives every kind from this doc in Python, and it shares only the word lists with the Swift code. It writes `kinds.json`, whose sections pin the seeds (`seeds`), the HKDF output (`hkdf`), the DiceKey ids (`diceKeyIds`), every kind and style (`cases`) and the defaults (`defaults`). `KindVectorTests` and `DiceKeySeedTests` check the app against it. `KeyRecipeTests` pin the default recipes byte for byte.
 
-  `KindVectorTests` and `DiceKeySeedTests` check the app against it. They match each kind's algorithms to the fixture's by type, not by order, and check that every recipe parses back to itself. `eachKindsAlgorithmsInOrder` pins this app's order, which may change. CI runs the script with `--tools`, so that these checks run too:
-  - `ssh-keygen`, `wg` and `age-keygen` 1.3 read every key back.
-  - `age` encrypts to every age recipient, and the identity decrypts it.
-  - The BIP39 reference decodes every phrase.
-- `KeyRecipeTests` check the name rules, JCS escaping and ordering, text that isn't a canonical recipe, and the default literals byte for byte. They also check that the parser refuses any other text that has no name.
-- `PassphraseListTests` and `PasswordFormatterTests` check the lists' digests and literal character sets. They also check blocks, quotients, digits and the uppercase word.
-- `OpenSSHFileTests`: `ssh-keygen` reads the private key file.
-- `age-pq-spec.txt` holds the post-quantum example pair from the age specification.
-- The script checks HKDF-SHA256 against RFC 5869's test cases 1 and 3. The Swift tests check it against case 3, the no-salt form. The tests also check BIP39 against its reference vectors.
+CI runs the script with `--tools`, so each format's own tools read every key back: `ssh-keygen`, `wg`, `age` and `age-keygen`, and the BIP39 reference.
