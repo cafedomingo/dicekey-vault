@@ -2,9 +2,9 @@
 //  Tuning.swift
 //  ReadDiceKey
 //
-//  The thresholds the scanner is tuned by, one group per step of the pipeline. Why each has
-//  its value, and what it was measured against, is in docs/scanning.md, "Constants and where
-//  they come from".
+//  The thresholds the scanner is tuned by, one group per step of the pipeline. Most doc comments
+//  say why their constant has its value. docs/scanning-measurements.md, "Constants and where they
+//  come from", gives the other reasons and the measurements.
 //
 
 /// The thresholds the scanner is tuned by, one group per step of the pipeline.

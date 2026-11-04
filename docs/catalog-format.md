@@ -2,7 +2,7 @@
 
 Paper outlives app versions. A list card or recovery sheet printed today must import in every later version of the app, and so must exported files. There are three forms:
 
-- **The file:** readable JSON, `{"v":1,"diceKeys":[…],"keys":[…]}`, from Settings ▸ Export. It is version 1. It has no size bound, and its purpose is to be readable.
+- **The file:** readable JSON, `{"v":1,"diceKeys":[…],"keys":[…]}`, from Settings ▸ Export. It is version 1. It has no size bound beyond the 1,000-item cap (see Reading it), and its purpose is to be readable.
 - **The link:** `dicekeyvault://import?catalog=<payload>`, on the list card's QR code. It is version 2.
 - **The recovery code:** `DKVR:<payload>`, on the recovery sheet. It is version 2. It is never a link, so the faces don't pass through iOS link handling.
 
@@ -58,7 +58,7 @@ An app reads each key on its own. It leaves out and counts any key that it can't
 - a key with a name that the rules of the app refuse;
 - in the file, a key with a `diceKey` that is neither in `diceKeys` nor already in the app.
 
-So a newer key never stops the app from reading the rest of the paper. When a key has a field that this version doesn't know, the app never reads the key as a different recipe. A recovery code's `id` must be the one that its `diceKey` text derives. The app refuses a file, link or code with more than 1,000 DiceKeys and keys together. It also refuses one whose `v` is newer than the app's, with "update the app".
+So a newer key never stops the app from reading the rest of the paper. When a key has a field that this version doesn't know, the app never reads the key as a different recipe. A recovery code's `id` must be the one that its `diceKey` text derives. The app refuses a file with more than 1,000 DiceKeys and keys together. The total leaves out the first two kinds of unreadable key above, because the app finds them as it reads the file. It includes the third kind, which the app finds only when it imports. The app refuses a link or code when its DiceKey and its keys together come to more than 1,000, and there the total includes every key, readable or not. So the app accepts at most 999 keys in a link or code. The app also refuses a file, link or code whose `v` is newer than the app's, with "update the app".
 
 Default keys (`derivation.md`) are in every form, as the fields of their literal recipes. So a later app can make each again from the file or paper alone. When the app imports or restores a default key that the catalog has, it adds nothing, as for any key. When the app imports or restores a DiceKey that it doesn't have, it records the DiceKey. Recording a DiceKey adds its default keys. The printed lists, and the counts that the app shows before an import or restore, leave out the defaults. They show the keys that the person made.
 

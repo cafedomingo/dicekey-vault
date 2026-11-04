@@ -7,6 +7,7 @@ Companion documents:
 - `catalog-format.md`: the catalog's file, link and code formats
 - `design.md`: the look
 - `scanning.md`: how the scanner reads a DiceKey
+- `scanning-measurements.md`: the measurements behind the scanner
 
 The repository's issues list what is left.
 
@@ -28,7 +29,7 @@ DiceKey Vault regenerates a few rarely used keys (SSH, WireGuard, age, passphras
 - **The keychain service** (`SavedDiceKeys`) can keep a DiceKey on this device, protected by user presence (Face ID, Touch ID or the passcode). It is never synced or restored elsewhere.
 - **The catalog** (SwiftData, `Model/Catalog.swift`: `DiceKeyRecord`, `KeyEntry`) holds only non-secret metadata. This is enough to derive each key again. `security.md` says what the catalog holds. `catalog-format.md` defines its fields, and defines how it travels as a file, a link and a code.
 - **`Derivation`**: `KeyRecipe` turns a kind and a name into canonical recipe JSON. It reads the JSON back only in that form. `DerivedKey` derives the keys of a recipe, one key for each of the kind's algorithms (`KeyKind.algorithms`). It also encodes each key. `scripts/derive-kinds.py`, an independent implementation, writes `Fixtures/kinds.json`.
-- **`ReadDiceKey`** is the scanner. `scripts/compare-upstream/compare-upstream.sh` also reads the photo corpus of `ReadDiceKey` with DiceKeys' own scanner, for the comparison in `scanning.md`.
+- **`ReadDiceKey`** is the scanner. `scripts/compare-upstream/compare-upstream.sh` also reads the photo corpus of `ReadDiceKey` with DiceKeys' own scanner, for the comparison in `scanning-measurements.md`.
 
 ## Where things live
 
@@ -120,11 +121,4 @@ TestFlight builds expire after ninety days. No setting changes this. To get a ne
 
 ## What CI covers
 
-`.github/workflows/build.yml` sets the Xcode version on GitHub-hosted macOS runners. CI covers:
-
-- `swift test -c release` for each package. In `Packages/Derivation`, it tests the kinds fixture, recipe validation, the key formats and RFC 5869's HKDF vectors. In `Packages/ReadDiceKey`, it tests the scanner over its photo corpus and drawn keys.
-- XcodeGen runs first. Then CI builds the iOS app for the simulator and runs its Swift Testing suite there.
-- CI builds the Mac app with Mac Catalyst, unsigned. This covers the code under `targetEnvironment(macCatalyst)`, which the iOS builds skip.
-- On Ubuntu, CI runs `swift format lint --strict`, SwiftLint, ruff, shellcheck and actionlint. The toolchain formatter decides the layout, and `.swift-format` configures it. CI also runs `derive-kinds.py --tools`, which checks the public keys against `ssh-keygen`, `wg` and `age-keygen`.
-
-If a pull request changes only `docs/`, `scripts/` and top-level Markdown, CI skips the macOS jobs.
+`.github/workflows/build.yml` runs the package tests, the app's Swift Testing suite on the simulator, the linters and an unused-code check. It also builds the Mac app with Mac Catalyst, for the code that the iOS builds skip. `workflow-lint.yml` checks changes under `.github/`. If a pull request changes only `docs/`, `scripts/` and top-level Markdown, CI skips the macOS jobs.
