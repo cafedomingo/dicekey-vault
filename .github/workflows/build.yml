@@ -182,14 +182,14 @@ jobs:
         run: swift run --package-path BuildTools xcodegen generate
       - name: Pick a simulator
         run: |
-          # The newest iPhone, by UDID: names repeat across runtimes.
+          # The newest iOS 27 iPhone, by UDID: names repeat across runtimes.
           UDID=$(xcrun simctl list devices available -j | python3 -c '
           import json,sys,re
           devices=json.load(sys.stdin)["devices"]
           best=None
           for runtime,devs in devices.items():
               m=re.search(r"iOS-(\d+)-(\d+)", runtime)
-              if not m: continue
+              if not m or int(m.group(1)) != 27: continue
               version=(int(m.group(1)),int(m.group(2)))
               for d in devs:
                   if d.get("isAvailable") and d["name"].startswith("iPhone"):

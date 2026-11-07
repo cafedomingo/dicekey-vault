@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 //
 // Derivation: recipes and the passwords, secrets and keys derived from a DiceKey seed.
 //
@@ -13,7 +13,7 @@ import PackageDescription
 let package = Package(
     name: "Derivation",
     platforms: [
-        .iOS(.v26),
+        .iOS(.v27),
         .macOS(.v26)
     ],
     products: [

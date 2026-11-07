@@ -13,7 +13,7 @@ DiceKey Vault turns a DiceKey (25 dice in a sealed box) into the few keys that y
 - **Making a key is looking it up.** A kind plus a name gives the key immediately. So New key shows the result live as you type. Save only adds the key to the catalog.
 - **Capture on the best camera, derive on the safest machine.** The phone reads the DiceKey best. The Mac app scans with the Mac's cameras or Continuity Camera. So a desktop is a suitable place to derive and export, on the same screens.
 
-## Platform: iOS 26 and later, Liquid Glass
+## Platform: iOS 27 and later, Liquid Glass
 
 - The app is a native SwiftUI app built from stock components. It has one two-column `NavigationSplitView` for every size. The sidebar is home, with every DiceKey and its keys. The detail column shows whichever of them is selected. The app pushes a key that you open from a DiceKey over that DiceKey. A phone shows the columns as a stack. The system draws the glass. This design only decides what goes on the glass.
 - **There are two layers.** The navigation layer is glass: toolbars, the sidebar, sheets, and controls over the camera. The content layer is flat: rows, the DiceKey grid, keys and secrets. Never put glass on content, and never stack glass on glass.

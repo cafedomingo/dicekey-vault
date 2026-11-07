@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 //
 // ReadDiceKey: the DiceKey scanner, in Swift, and the face specification it reads with. The
 // app uses both. See docs/scanning.md.
@@ -11,7 +11,7 @@ import PackageDescription
 let package = Package(
     name: "ReadDiceKey",
     platforms: [
-        .iOS(.v26),
+        .iOS(.v27),
         .macOS(.v26)
     ],
     products: [
