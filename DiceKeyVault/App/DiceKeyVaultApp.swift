@@ -55,11 +55,13 @@ struct DiceKeyVaultApp: App {
         }
     }
 
-    /// The Mac's first window, in the iPad points that the Mac app scales down: home's sidebar at
-    /// the 416 points that the Mac gives it, beside content at `contentWidth` with the system's
-    /// 20-point list margins, since a wider window only widens the margins. It is taller than wide,
-    /// for the keys, and macOS shrinks it to fit a smaller screen.
-    private static let macWindowSize = CGSize(width: 416 + .contentWidth + 2 * 20, height: 1000)
+    #if targetEnvironment(macCatalyst)
+        /// The Mac's first window, in the iPad points that the Mac app scales down: home's sidebar at
+        /// the 416 points that the Mac gives it, beside content at `contentWidth` with the system's
+        /// 20-point list margins, since a wider window only widens the margins. It is taller than wide,
+        /// for the keys, and macOS shrinks it to fit a smaller screen.
+        private static let macWindowSize = CGSize(width: 416 + .contentWidth + 2 * 20, height: 1000)
+    #endif
 
     var body: some Scene {
         WindowGroup {
