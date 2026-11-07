@@ -199,7 +199,11 @@ struct KeyRow: View {
         if let recipe = entry.recipe {
             Label {
                 Text(recipe.title).font(.headline)
-                Text(recipe.isDefault ? "Default" : recipe.kind.title)
+                if recipe.isDefault {
+                    DefaultTag()
+                } else {
+                    Text(recipe.kind.title)
+                }
             } icon: {
                 Image(systemName: recipe.kind.symbol)
                     .foregroundStyle(.tint)
@@ -207,6 +211,21 @@ struct KeyRow: View {
                     .background(Color.accentSoft, in: .rect(cornerRadius: .radiusSm))
             }
         }
+    }
+}
+
+/// Sets a default key apart from the named keys, in the place where a named key's row gives its kind,
+/// since a default's kind is already its name.
+private struct DefaultTag: View {
+    private static let verticalPadding: CGFloat = 2
+
+    var body: some View {
+        Text("Default")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color.accentInk)
+            .padding(.horizontal, .space2)
+            .padding(.vertical, Self.verticalPadding)
+            .background(Color.accentSoft, in: .capsule)
     }
 }
 
