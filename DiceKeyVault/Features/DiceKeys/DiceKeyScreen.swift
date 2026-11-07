@@ -46,11 +46,16 @@ struct DiceKeyScreen: View {
 
     private var diceKey: DiceKey? { unlocked.diceKey(id: record.diceKeyID) }
 
+    private func status(keyCount: Int) -> AttributedString {
+        AttributedString(isNew ? "New DiceKey · " : "")
+            + AttributedString(localized: "^[\(keyCount) key](inflect: true)")
+            + AttributedString(diceKey != nil ? " · unlocked" : " · locked")
+    }
+
     var body: some View {
         let keys = entries.uniqueKeys
         List {
             Section {
-                DiceKeyHeader(record: record, isNew: isNew, keyCount: keys.count, isUnlocked: diceKey != nil)
                 if let diceKey {
                     DiceKeyGrid(diceKey: diceKey, concealed: !isGridShown)
                         .frame(maxWidth: .infinity)
@@ -79,7 +84,8 @@ struct DiceKeyScreen: View {
         .centeredContent()
         .appBackdrop()
         .navigationTitle(record.name)
-        .toolbarTitleDisplayMode(.inline)
+        .navigationSubtitle(Text(status(keyCount: keys.count)))
+        .toolbarTitleDisplayMode(.large)
         .toolbar { toolbar }
         .concealsWhenExposed($isGridShown)
         .alert("Rename DiceKey", isPresented: $isRenaming) {
@@ -181,32 +187,6 @@ struct DiceKeyScreen: View {
                     self.error = PresentableError(title: "Keychain Unavailable", error: error)
                 }
             })
-    }
-}
-
-struct DiceKeyHeader: View {
-    private static let spacing: CGFloat = 12
-    private static let lineSpacing: CGFloat = 2
-
-    let record: DiceKeyRecord
-    let isNew: Bool
-    let keyCount: Int
-    let isUnlocked: Bool
-
-    var body: some View {
-        HStack(spacing: Self.spacing) {
-            DiceAvatar(centerFace: record.centerFace, size: DieView.Size.header)
-            VStack(alignment: .leading, spacing: Self.lineSpacing) {
-                Text(record.name).font(.title2.weight(.semibold))
-                Text(status).font(.footnote).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    private var status: AttributedString {
-        AttributedString(isNew ? "New DiceKey · " : "")
-            + AttributedString(localized: "^[\(keyCount) key](inflect: true)")
-            + AttributedString(isUnlocked ? " · unlocked" : " · locked")
     }
 }
 
