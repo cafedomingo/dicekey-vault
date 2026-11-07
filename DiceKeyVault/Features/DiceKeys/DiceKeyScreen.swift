@@ -68,15 +68,26 @@ struct DiceKeyScreen: View {
                     lockedActions
                 }
             }
-            Section("Keys") {
-                ForEach(keys) { entry in
-                    NavigationLink(value: KeySelection.entry(entry.persistentModelID)) { KeyRow(entry: entry) }
-                        .swipeActions(allowsFullSwipe: false) {
-                            if entry.recipe?.isDefault == false {
+            let defaults = keys.filter { $0.recipe?.isDefault == true }
+            let named = keys.filter { $0.recipe?.isDefault == false }
+            if !defaults.isEmpty {
+                Section("Default keys") {
+                    ForEach(defaults) { entry in
+                        NavigationLink(value: KeySelection.entry(entry.persistentModelID)) {
+                            KeyRow(entry: entry, marksDefault: false)
+                        }
+                    }
+                }
+            }
+            if !named.isEmpty {
+                Section("Keys") {
+                    ForEach(named) { entry in
+                        NavigationLink(value: KeySelection.entry(entry.persistentModelID)) { KeyRow(entry: entry) }
+                            .swipeActions(allowsFullSwipe: false) {
                                 Button("Delete", systemImage: "trash") { keyToDelete = entry }
                                     .tint(Color.danger)
                             }
-                        }
+                    }
                 }
             }
         }
@@ -190,16 +201,27 @@ struct DiceKeyScreen: View {
     }
 }
 
+/// A key's icon and name, over its kind or "Default". The two lines are a stack, because the Mac
+/// sets a label's second text beside the first, where it read as part of the name.
 struct KeyRow: View {
     private static let iconSide: CGFloat = 36
+    private static let lineSpacing: CGFloat = 2
 
     let entry: KeyEntry
+    /// Off where the row's section already says that its keys are defaults.
+    var marksDefault = true
 
     var body: some View {
         if let recipe = entry.recipe {
             Label {
-                Text(recipe.title).font(.headline)
-                Text(recipe.isDefault ? "Default" : recipe.kind.title)
+                VStack(alignment: .leading, spacing: Self.lineSpacing) {
+                    Text(recipe.title).font(.headline)
+                    if !recipe.isDefault || marksDefault {
+                        Text(recipe.isDefault ? "Default" : recipe.kind.title)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             } icon: {
                 Image(systemName: recipe.kind.symbol)
                     .foregroundStyle(.tint)

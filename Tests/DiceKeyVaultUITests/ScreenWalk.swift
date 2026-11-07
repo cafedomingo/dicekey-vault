@@ -226,7 +226,7 @@ final class ScreenWalk: XCTestCase {
         snap("keep-offer", settle: 1.5)
         tap(app.alerts.buttons["Not now"], "Not now")
         snap("dicekey-new", settle: 1.5)
-        tap(rightmost(app.cells.containing(.staticText, identifier: "Default")), "Default key")
+        tap(rightmost(app.cells.containing(.staticText, identifier: "SSH")), "Default key")
         snap("key-default")
         back()
         tap(button("Show dice"), "Show dice")
