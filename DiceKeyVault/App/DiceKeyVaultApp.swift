@@ -34,20 +34,32 @@ struct DiceKeyVaultApp: App {
             fatalError("The catalog store can't be opened: \(error)")
         }
         privacyCover.startObserving()
-        Self.elevateScenes()
+        Self.configureScenes()
     }
 
     /// Every scene is elevated, as a sheet is, so that in dark the system draws list rows a step
-    /// lighter than `bg` and keeps its own tap and selection highlights. `queue: nil` delivers
-    /// on the posting thread, and UIKit connects scenes on the main thread.
-    private static func elevateScenes() {
+    /// lighter than `bg` and keeps its own tap and selection highlights. On the Mac, the window
+    /// hides its title, because the sidebar already shows the app's name as its title.
+    /// `queue: nil` delivers on the posting thread, and UIKit connects scenes on the main thread.
+    private static func configureScenes() {
         _ = NotificationCenter.default.addObserver(
             forName: UIScene.willConnectNotification, object: nil, queue: nil
         ) { note in
             guard let scene = note.object as? UIWindowScene else { return }
-            MainActor.assumeIsolated { scene.traitOverrides.userInterfaceLevel = .elevated }
+            MainActor.assumeIsolated {
+                scene.traitOverrides.userInterfaceLevel = .elevated
+                #if targetEnvironment(macCatalyst)
+                    scene.titlebar?.titleVisibility = .hidden
+                #endif
+            }
         }
     }
+
+    /// The Mac's first window, in the iPad points that the Mac app scales down: home's sidebar at
+    /// the 416 points that the Mac gives it, beside content at `contentWidth` with the system's
+    /// 20-point list margins, since a wider window only widens the margins. It is taller than wide,
+    /// for the keys, and macOS shrinks it to fit a smaller screen.
+    private static let macWindowSize = CGSize(width: 416 + .contentWidth + 2 * 20, height: 1000)
 
     var body: some Scene {
         WindowGroup {
@@ -56,10 +68,10 @@ struct DiceKeyVaultApp: App {
                 .environment(saved)
                 .modelContainer(catalog)
                 .environment(\.catalogSyncFailure, syncFailure)
-                #if targetEnvironment(macCatalyst)
-                    .scrollEdgeEffectHidden(true, for: .top)
-                #endif
         }
+        #if targetEnvironment(macCatalyst)
+            .defaultSize(Self.macWindowSize)
+        #endif
     }
 }
 
