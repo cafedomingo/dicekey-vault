@@ -53,8 +53,10 @@ struct DiceKeyList: View {
     private func section(for record: DiceKeyRecord) -> some View {
         let keys = entries.filter { $0.diceKeyID == record.diceKeyID }.uniqueKeys
         return Section {
-            DiceKeyRow(record: record, keyCount: keys.count)
-                .tag(SidebarSelection.diceKey(record.diceKeyID))
+            DiceKeyRow(record: record, keyCount: keys.count) {
+                selection = .diceKey(record.diceKeyID)
+            }
+            .tag(SidebarSelection.diceKey(record.diceKeyID))
             ForEach(keys) { entry in
                 KeyRow(entry: entry)
                     .tag(SidebarSelection.key(entry.persistentModelID))
@@ -82,6 +84,8 @@ private struct DiceKeyRow: View {
 
     let record: DiceKeyRecord
     let keyCount: Int
+    /// Opens the DiceKey, since unlocking is for using its keys.
+    let onUnlocked: () -> Void
 
     @Environment(UnlockedDiceKeys.self) private var unlocked
     @Environment(SavedDiceKeys.self) private var saved
@@ -98,7 +102,7 @@ private struct DiceKeyRow: View {
             .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
             Spacer()
             if !isUnlocked && saved.contains(id: record.diceKeyID) {
-                UnlockButton(diceKeyID: record.diceKeyID, name: record.name)
+                UnlockButton(diceKeyID: record.diceKeyID, name: record.name) { _ in onUnlocked() }
                     .buttonStyle(.bordered)
                     .tint(RowAccentInk())
                     .buttonBorderShape(.capsule)
