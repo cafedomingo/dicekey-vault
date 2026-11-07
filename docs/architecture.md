@@ -13,12 +13,12 @@ The repository's issues list what is left.
 
 ## The app in one paragraph
 
-DiceKey Vault regenerates a few rarely used keys (SSH, WireGuard, age, passphrases, BIP39 wallet phrases) from a DiceKey. It stores no secret. It is one SwiftUI target, for iOS 26 and later and for Mac Catalyst on the Mac. The target uses Observation, async/await and Swift 6 strict concurrency, and it has no external dependencies. The user scans a DiceKey with the camera or types it by hand. Two local Swift packages supply the rest. `Derivation` has two targets: `Derivation`, for recipes and derived values, and `KeyFormats`, for key encodings and BIP39. `ReadDiceKey` holds the generated face specification, with the font that the dice are printed in, and the DiceKey scanner. The app and its packages contain no Objective-C or C++. The one C++ file is the driver of `scripts/compare-upstream/`.
+DiceKey Vault regenerates a few rarely used keys (SSH, WireGuard, age, passphrases, BIP39 wallet phrases) from a DiceKey. It stores no secret. It is one SwiftUI target, for iOS 27 and later and for Mac Catalyst on the Mac. The target uses Observation, async/await and Swift 6 strict concurrency, and it has no external dependencies. The user scans a DiceKey with the camera or types it by hand. Two local Swift packages supply the rest. `Derivation` has two targets: `Derivation`, for recipes and derived values, and `KeyFormats`, for key encodings and BIP39. `ReadDiceKey` holds the generated face specification, with the font that the dice are printed in, and the DiceKey scanner. The app and its packages contain no Objective-C or C++. The one C++ file is the driver of `scripts/compare-upstream/`.
 
 ## Goals, in priority order
 
 1. **Always be able to read a DiceKey and re-derive the same secrets.** The derivation and the scanner are Swift code. You build them from sources in this repository. The project checks each against something independent of it (`derivation.md`, `scanning.md`). Any change that alters derived output is a bug.
-2. Build with the current Xcode against the current SDKs. Use Swift 6 language mode, strict concurrency and no deprecated APIs. GitHub Actions macOS runners compile the app, so the SDK floor follows what they ship. The runners have no iOS 27 SDK, so the deployment target is 26.
+2. Build with Xcode 27 against the iOS 27 SDK. Use Swift 6 language mode, strict concurrency and no deprecated APIs. GitHub Actions uses the `xcode-27` runners and tests on an iOS 27 simulator. The deployment target is iOS 27.
 3. Use Liquid Glass throughout (`design.md`), with system chrome where possible. Make sure nothing in the interface conflicts with the system look.
 
 ## Shape of the app

@@ -8,10 +8,9 @@
 
 name: DiceKeyVault
 options:
-  # The runners have no iOS 27 SDK, so the deployment target is 26.
   deploymentTarget:
-    iOS: "26.0"
-  xcodeVersion: "26.6"
+    iOS: "27.0"
+  xcodeVersion: "27.2"
   createIntermediateGroups: true
   generateEmptyDirectories: false
   groupSortPosition: top
