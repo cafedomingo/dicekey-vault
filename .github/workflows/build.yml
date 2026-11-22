@@ -58,7 +58,7 @@ jobs:
           "$RUNNER_TEMP/kinds/bin/pip" install -r scripts/requirements.txt
           PATH="$RUNNER_TEMP/age:$PATH" "$RUNNER_TEMP/kinds/bin/python" scripts/derive-kinds.py --tools
       - name: actionlint
-        uses: kjanat/actionlint@08bb2c4f0d039744455b87aef1c647fb8b66d37b # v1.17.0
+        uses: kjanat/actionlint@220b76cfa568e00ed8b3c476898f849a722b88e2 # v1.17.1
 
   # PRs that change only docs/, scripts/ and top-level Markdown skip the macOS jobs; XcodeGen
   # bundles Markdown elsewhere. An `if:` rather than a path filter, which leaves required checks
